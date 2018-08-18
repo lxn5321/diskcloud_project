@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<link rel="icon" href="{{url_for('DiskCloud.static',filename = 'icons/cloud_icon_32.png')}}">
+
+		<link rel="stylesheet" href="{{url_for('DiskCloud.static',filename = 'css/bootstrap.min.css')}}">
+		<link rel="stylesheet" href="{{url_for('DiskCloud.static',filename = 'css/login_html.css')}}">
+
+		<title>DiskCloud</title>
+	</head>
+	<body class="text-center">
+		<form class="form-signin" method='post'>
+			<img class="mb-4" src="{{url_for('DiskCloud.static',filename = 'images/cloud.svg')}}" alt="" width="64" height="64">
+			<h3 class="title mb-3">登录</h3>
+			<div class="mb-2">
+				<label class="sr-only" for="input_username">用户名:</label>
+				<input type="text" name="username" id="input_username" class="form-control" placeholder="用户名" required autofocus>
+				<label class="sr-only" for="input_password">密码:</label>
+				<input type="password" name="password" id="input_password" class="form-control" placeholder="密码" required>
+			</div>
+			<div class="checkbox mb-2">
+				<input type="checkbox" name="enable_cookie" id="checkbox_cookie" value="true">
+				<label for="checkbox_cookie">记住我</label>
+			</div>
+			<button class="btn btn-lg btn-primary btn-block" type="submit">提交</button>
+		</form>
+		<div class="footer">
+			<p>
+				Icon made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">flaticon</a>
+			</p>
+			<p>
+				©2018 lomojuice
+			</p>
+		</div>
+
+		<!-- <script src="{{url_for('DiskCloud.static',filename = 'js/jquery-3.3.1.min.js')}}"></script>
+		<script src="{{url_for('DiskCloud.static',filename = 'js/popper.min.js')}}"></script>
+		<script src="{{url_for('DiskCloud.static',filename = 'js/bootstrap.min.js')}}"></script> -->
+		<script async>
+			window.history.replaceState('',0,"{{url_for('DiskCloud.Login')}}");
+		</script>
+	</body>
+</html>

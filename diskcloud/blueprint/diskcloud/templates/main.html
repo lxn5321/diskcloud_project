@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<link rel="icon" href="{{url_for('DiskCloud.static',filename = 'icons/cloud_icon_32.png')}}">
+
+		<link rel="stylesheet" href="{{url_for('DiskCloud.static',filename = 'css/bootstrap.min.css')}}">
+		<link rel="stylesheet" href="{{url_for('DiskCloud.static',filename = 'css/main_html.css')}}">
+
+		<title>DiskCloud</title>
+	</head>
+	<body>
+		<div class="container-fluid">
+			<div class="row justify-content-end">
+				<button type="button" class="btn btn-success" id="logout_btn">注销</button>
+			</div>
+		</div>
+		<div class="container" id="entry_container">
+			<div class="row" id="breadcrumb_row">
+				<div class="col-12">
+				</div>
+			</div>
+			<div class="row" id="title_row">
+				<div class="col-7">
+					名称
+				</div>
+				<div class="col-2">
+					大小
+				</div>
+				<div class="col-3">
+					修改日期
+				</div>
+			</div>
+		</div>
+		<div class='popover' id='entry_menu'>
+			<div class='popover-title' id='entry_menu_title'></div>
+			<div class='popover-body' id='entry_menu_body'>
+				<div class='popover-entry' id='entry_menu_open'>打开</div>
+				<div class='popover-entry' id='entry_menu_download'>下载</div>
+				<div class='popover-entry' id='entry_menu_share'>分享</div>
+				<div class='popover-entry' id='entry_menu_move'>移动到...</div>
+				<div class='popover-entry' id='entry_menu_delete'>删除</div>
+				<div class='popover-entry' id='entry_menu_rename'>重命名</div>
+			</div>
+		</div>
+		<div class='popover' id='blank_menu'>
+			<div class='popover-title' id='blank_menu_title'></div>
+			<div class='popover-body' id='blank_menu_body'>
+				<div class='popover-entry' id='blank_menu_create_file'>新建文件</div>
+				<div class='popover-entry' id='blank_menu_create_foler'>新建文件夹</div>
+				<div class='popover-entry' id='blank_menu_upload_file'>上传文件</div>
+				<div class='popover-entry' id='blank_menu_upload_folder'>上传文件夹</div>
+			</div>
+		</div>
+
+		<script>
+		var CURRENTPATH = null;
+		var JSONDATA = null;
+		document.addEventListener("DOMContentLoaded", function(){
+			var fetch_init = {credentials: "same-origin"};
+			fetch(PARADICT["api_file_url"], fetch_init).then(function(response) {
+				if (response.ok) {
+					response.json().then(function(data) {
+						CURRENTPATH = "/";
+						JSONDATA = data;
+						createDirTable();
+						createBreadCrumb();
+					})
+				}
+			});
+		},false);
+		var SEPARATORSYMBOL = ">";
+		var _PATHID = 0;
+		var PARADICT = new Array();
+		PARADICT["api_file_url"] = "{{url_for('Api.MainApi',username = username)}}";
+		PARADICT["logout_url"] = "{{url_for('DiskCloud.Login')}}?logout=1";
+		PARADICT["apk_icon"] = "{{url_for('DiskCloud.static',filename = 'icons/apk.png')}}"
+		PARADICT["code_icon"] = "{{url_for('DiskCloud.static',filename = 'icons/code.png')}}"
+		PARADICT["doc_icon"] = "{{url_for('DiskCloud.static',filename = 'icons/doc.png')}}"
+		PARADICT["exe_icon"] = "{{url_for('DiskCloud.static',filename = 'icons/exe.png')}}"
+		PARADICT["folder_icon"] = "{{url_for('DiskCloud.static',filename = 'icons/folder.png')}}"
+		PARADICT["image_icon"] = "{{url_for('DiskCloud.static',filename = 'icons/image.png')}}"
+		PARADICT["music_icon"] = "{{url_for('DiskCloud.static',filename = 'icons/music.png')}}"
+		PARADICT["pdf_icon"] = "{{url_for('DiskCloud.static',filename = 'icons/pdf.png')}}"
+		PARADICT["tar_icon"] = "{{url_for('DiskCloud.static',filename = 'icons/tar.png')}}"
+		PARADICT["txt_icon"] = "{{url_for('DiskCloud.static',filename = 'icons/txt.png')}}"
+		PARADICT["torrent_icon"] = "{{url_for('DiskCloud.static',filename = 'icons/torrent.png')}}"
+		PARADICT["unknow_icon"] = "{{url_for('DiskCloud.static',filename = 'icons/unknow.png')}}"
+		PARADICT["video_icon"] = "{{url_for('DiskCloud.static',filename = 'icons/video.png')}}"
+		PARADICT["zip_icon"] = "{{url_for('DiskCloud.static',filename = 'icons/zip.png')}}"
+		</script>
+		<script src="{{url_for('DiskCloud.static',filename = 'js/jquery-3.3.1.min.js')}}"></script>
+		<!-- <script src="{{url_for('DiskCloud.static',filename = 'js/bootstrap.bundle.min.js')}}"></script> -->
+		<script src="{{url_for('DiskCloud.static',filename = 'js/main_html.js')}}"></script>
+	</body>
+</html>

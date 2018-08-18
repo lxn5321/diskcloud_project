@@ -1,0 +1,61 @@
+html{
+    font-size: 14px;
+}
+#breadcrumb_row .bc_separator,
+#breadcrumb_row .bc_path{
+    font-size: 20px;
+}
+@media (min-width:450px) {
+    html{
+        font-size: 16px;
+    }
+    #breadcrumb_row .bc_separator,
+    #breadcrumb_row .bc_path{
+        font-size: 24px;
+    }
+}
+
+body{
+    user-select: none;
+}
+
+.container-fluid button{
+    margin: 0.25rem 0.25rem;
+}
+#entry_menu,
+#blank_menu{
+    display: none;
+    position: absolute;
+}
+#breadcrumb_row .bc_separator{
+    padding: 0rem 0.25rem;
+}
+#breadcrumb_row .bc_path:hover{
+    background-color: rgb(241, 243, 244);
+    cursor: pointer;
+}
+
+#entry_container > div[class~="file_row"],
+#entry_container > div[class~="folder_row"],
+#title_row{
+    border-top: 1px solid rgb(232, 234, 237);
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    cursor: default;
+}
+#entry_container > div[class~="file_row"]:hover,
+#entry_container > div[class~="folder_row"]:hover{
+    background-color: rgb(246, 250, 255);
+}
+#entry_container > div[class~="selected"],
+#entry_container > div[class~="selected"]:hover{
+    background-color: rgb(232, 240, 254);
+}
+#entry_container > .media{
+    padding-left: 0.5rem;
+}
+#entry_container .media .icon_container{
+    width: 26px;
+    height: 24px;
+    margin-right: 0.5rem;
+}

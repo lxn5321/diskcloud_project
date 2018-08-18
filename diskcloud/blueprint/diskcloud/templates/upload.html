@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+	<head>
+		<meta charset="utf-8">
+		<title>upload</title>
+	</head>
+	<body>
+		<form method='post' enctype="multipart/form-data">
+			<div>
+				<label for="file">Choose file to upload</label>
+				<input type="file" id="file" name="file" multiple >
+			</div>
+			<div class="preview">
+				<p>No file currently selected for upload</p>
+			</div>
+			<div>
+				<input type="submit" name="submit" value="submit">
+			</div>
+		</form>
+
+		<script type="text/javascript" src="{{ url_for('DiskCloud.static',filename = 'js/upload_html.js') }}">
+		</script>
+	</body>
+</html>
