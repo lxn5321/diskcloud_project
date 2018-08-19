@@ -1,7 +1,3 @@
-document.querySelector("#logout_btn").addEventListener("click", function() {
-    window.location.replace(PARADICT["logout_url"]);
-}, false);
-
 function createDirTable(path = CURRENTPATH, data = JSONDATA) {
     // If path != "/" and path ends with a slash, remove the slash
     var pathLength = path.length
@@ -9,123 +5,74 @@ function createDirTable(path = CURRENTPATH, data = JSONDATA) {
         path = path.slice(0,pathLength - 1);
     }
     // if dir row or file row exist,remove
-    var folderRows = document.querySelectorAll("div#entry_container > div.folder_row");
-    if (folderRows) {
-        for (var i = 0; i < folderRows.length; i++) {
-            folderRows[i].remove();
-        }
+    var entryRow = $("#entry_container > .entry_row");
+    if(entryRow){
+        entryRow.remove();
     }
-    var fileRows = document.querySelectorAll("div#entry_container > div.file_row");
-    if (fileRows) {
-        for (var i = 0; i < fileRows.length; i++) {
-            fileRows[i].remove();
-        }
-    }
-    var entryContainer = document.querySelector("#entry_container");
+
+    var entryContainer = $("#entry_container");
     // create folder row
     for (var n = 0; n < data[path].directories.length; n++) {
-        var num = n + 1;
-        var folderRow = document.createElement("div");
-        folderRow.classList.add("row", "folder_row","entry_row");
-        folderRow.setAttribute("id", "folder_row" + num);
-        var nameCol = document.createElement("div");
-        nameCol.classList.add("col-7", "media", "d-flex", "align-items-center");
-        // create icon for folder
-        var iconContainer = document.createElement("div");
-        iconContainer.classList.add("icon_container", "d-flex", "align-items-center", "justify-content-center");
-        var icon = document.createElement("img");
-        var mediaBody = document.createElement("div");
-        mediaBody.classList.add("media-body");
-        var size = document.createElement("div");
-        size.classList.add("col-2", "d-flex", "align-items-center");
-        var mtime = document.createElement("div");
-        mtime.classList.add("col-3", "d-flex", "align-items-center");
-        for (var m = 0; m < 2; m++) {
-            if (m == 0) {
-                icon.setAttribute("src", PARADICT["folder_icon"]);
-                mediaBody.innerHTML = data[path].directories[n][m];
-            } else {
-                mtime.innerHTML = data[path].directories[n][m];
-            }
-        }
-        iconContainer.appendChild(icon);
-        nameCol.appendChild(iconContainer);
-        nameCol.appendChild(mediaBody);
-        folderRow.appendChild(nameCol);
-        folderRow.appendChild(size);
-        folderRow.appendChild(mtime);
-        entryContainer.appendChild(folderRow);
+        var folderRow = $("<div class='row folder_row entry_row' id='folder_row" + (n + 1) + "'></div>");
+        var nameCol = $("<div class='col-7 media d-flex align-items-center'></div>");
+        var iconContainer = $("<div class='icon_container d-flex align-items-center justify-content-center'></div>");
+        var icon = $("<div class='folder_icon'></div>");
+        var mediaBody = $("<div class='media-body'></div>").text(data[path].directories[n][0]);
+        var sizeCol = $("<div class='col-2 d-flex align-items-center'></div>");
+        var mtimeCol = $("<div class='col-3 d-flex align-items-center'></div>").text(data[path].directories[n][1]);
+        iconContainer.append(icon);
+        nameCol.append(iconContainer,mediaBody);
+        folderRow.append(nameCol,sizeCol,mtimeCol);
+        entryContainer.append(folderRow);
     }
     // create file row
     for (var n = 0; n < data[path].files.length; n++) {
-        num = n + 1;
-        var fileRow = document.createElement("div");
-        fileRow.classList.add("row", "file_row","entry_row");
-        fileRow.setAttribute("id", "file_row" + num);
-        var nameCol = document.createElement("div");
-        nameCol.classList.add("col-7", "media", "d-flex", "align-items-center");
-        // create icon for file
-        var iconContainer = document.createElement("div");
-        iconContainer.classList.add("icon_container", "d-flex", "align-items-center", "justify-content-center");
-        var icon = document.createElement("img");
-        var mediaBody = document.createElement("div");
-        mediaBody.classList.add("media-body");
-        var size = document.createElement("div");
-        size.classList.add("col-2", "d-flex", "align-items-center");
-        var mtime = document.createElement("div");
-        mtime.classList.add("col-3", "d-flex", "align-items-center");
-        for (var m = 0; m < 3; m++) {
-            if (m == 0) {
-                var fileName = data[path].files[n][m];
-                var index = fileName.lastIndexOf(".");
-                // Add the specified icon by file format
-                if (index == -1) {
-                    icon.setAttribute("src", PARADICT["unknow_icon"]);
-                } else {
-                    var suffix = fileName.slice(index + 1).toLowerCase();
-                    if (suffix == "apk") {
-                        icon.setAttribute("src", PARADICT["apk_icon"]);
-                    } else if (suffix == "json" || suffix == "xml" || suffix == "py" || suffix == "java" || suffix == "bat" || suffix == "c" || suffix == "cpp" || suffix == "sh") {
-                        icon.setAttribute("src", PARADICT["code_icon"]);
-                    } else if (suffix == "doc" || suffix == "docx") {
-                        icon.setAttribute("src", PARADICT["doc_icon"]);
-                    } else if (suffix == "exe") {
-                        icon.setAttribute("src", PARADICT["exe_icon"]);
-                    } else if (suffix == "png" || suffix == "jpg" || suffix == "jpeg" || suffix == "git" || suffix == "ico" || suffix == "bmp") {
-                        icon.setAttribute("src", PARADICT["image_icon"]);
-                    } else if (suffix == "wav" || suffix == "ape" || suffix == "flac" || suffix == "wma" || suffix == "mp3" || suffix == "aac") {
-                        icon.setAttribute("src", PARADICT["music_icon"]);
-                    } else if (suffix == "pdf") {
-                        icon.setAttribute("src", PARADICT["pdf_icon"]);
-                    } else if (suffix == "tar" || suffix == "bz2" || suffix == "gz" || suffix == "xz" || suffix == "wim") {
-                        icon.setAttribute("src", PARADICT["tar_icon"]);
-                    } else if (suffix == "txt" || suffix == "log") {
-                        icon.setAttribute("src", PARADICT["txt_icon"]);
-                    } else if (suffix == "torrent") {
-                        icon.setAttribute("src", PARADICT["torrent_icon"]);
-                    } else if (suffix == "mp4" || suffix == "avi" || suffix == "mpeg" || suffix == "wmv" || suffix == "3gp" || suffix == "mkv" || suffix == "flv" || suffix == "rmvb" || suffix == "mpe" || suffix == "ogg") {
-                        icon.setAttribute("src", PARADICT["video_icon"]);
-                    } else if (suffix == "zip" || suffix == "7z") {
-                        icon.setAttribute("src", PARADICT["zip_icon"]);
-                    } else {
-                        icon.setAttribute("src", PARADICT["unknow_icon"]);
-                    }
-                }
-                mediaBody.innerHTML = fileName;
-            } else if (m == 1) {
-                mtime.innerHTML = data[path].files[n][m];
+        var fileName = data[path].files[n][0];
+        var fileRow = $("<div class='row file_row entry_row' id='file_row" + (n + 1) + "'></div>");
+        var nameCol = $("<div class='col-7 media d-flex align-items-center'></div>");
+        var iconContainer = $("<div class='icon_container d-flex align-items-center justify-content-center'></div>");
+        var icon = $("<div></div>");
+        var mediaBody = $("<div class='media-body'></div>").text(fileName);
+        var sizeCol = $("<div class='col-2 d-flex align-items-center'></div>").text(data[path].files[n][2]);
+        var mtimeCol = $("<div class='col-3 d-flex align-items-center'></div>").text(data[path].files[n][1]);
+        // add icon by file name suffix
+        var index = fileName.lastIndexOf(".");
+        var suffix = fileName.slice(index + 1).toLowerCase();
+        if (index == -1) {
+            icon.addClass("unknow_icon");
+        } else{
+            if (suffix == "apk") {
+                icon.addClass("apk_icon");
+            } else if (suffix == "json" || suffix == "xml" || suffix == "py" || suffix == "java" || suffix == "bat" || suffix == "c" || suffix == "cpp" || suffix == "sh") {
+                icon.addClass("code_icon");
+            } else if (suffix == "doc" || suffix == "docx") {
+                icon.addClass("doc_icon");
+            } else if (suffix == "exe") {
+                icon.addClass("exe_icon");
+            } else if (suffix == "png" || suffix == "jpg" || suffix == "jpeg" || suffix == "git" || suffix == "ico" || suffix == "bmp") {
+                icon.addClass("image_icon");
+            } else if (suffix == "wav" || suffix == "ape" || suffix == "flac" || suffix == "wma" || suffix == "mp3" || suffix == "aac") {
+                icon.addClass("music_icon");
+            } else if (suffix == "pdf") {
+                icon.addClass("pdf_icon");
+            } else if (suffix == "tar" || suffix == "bz2" || suffix == "gz" || suffix == "xz" || suffix == "wim") {
+                icon.addClass("tar_icon");
+            } else if (suffix == "txt" || suffix == "log") {
+                icon.addClass("txt_icon");
+            } else if (suffix == "torrent") {
+                icon.addClass("torrent_icon");
+            } else if (suffix == "mp4" || suffix == "avi" || suffix == "mpeg" || suffix == "wmv" || suffix == "3gp" || suffix == "mkv" || suffix == "flv" || suffix == "rmvb" || suffix == "mpe" || suffix == "ogg") {
+                icon.addClass("video_icon");
+            } else if (suffix == "zip" || suffix == "7z") {
+                icon.addClass("zip_icon");
             } else {
-                file_size = parseInt(data[path].files[n][m]);
-                size.innerHTML = toStandardSize(file_size);
+                icon.addClass("unknow_icon");
             }
         }
-        iconContainer.appendChild(icon);
-        nameCol.appendChild(iconContainer);
-        nameCol.appendChild(mediaBody);
-        fileRow.appendChild(nameCol);
-        fileRow.appendChild(size);
-        fileRow.appendChild(mtime);
-        entryContainer.appendChild(fileRow);
+        iconContainer.append(icon);
+        nameCol.append(iconContainer,mediaBody);
+        fileRow.append(nameCol,sizeCol,mtimeCol);
+        entryContainer.append(fileRow);
     }
     //bind event function to element
     $("#entry_container > .folder_row").on({
@@ -133,97 +80,84 @@ function createDirTable(path = CURRENTPATH, data = JSONDATA) {
     });
     $("#entry_container > .entry_row").on({
         click: entryRowClickHandler,
-        contextmenu: entryRowRightClickHandler
+        contextmenu: entryContainerRightClickHandler
     });
     $("#entry_container").on({
-        contextmenu: blankAreaRightClickHandler
+        contextmenu: entryContainerRightClickHandler
     })
 }
 
-function createBreadCrumb(dirName = "") {
-    var col = document.querySelector("#breadcrumb_row > .col-12");
-    if (dirName != "") {
-        var separator = document.createElement("span");
-        separator.classList.add("bc_separator");
-        separator.innerHTML = SEPARATORSYMBOL;
-        col.appendChild(separator);
-        var path = document.createElement("span");
-        path.classList.add("bc_path");
-        _PATHID++;
-        path.setAttribute("id","bc_path" + _PATHID);
-        path.innerHTML = dirName;
-        col.appendChild(path);
-    } else {
-        var breadCrumbElements = document.querySelectorAll("#breadcrumb_row span[class^='bc']");
-        if (breadCrumbElements) {
-            for (var i = 0; i < breadCrumbElements.length; i++) {
-                breadCrumbElements[i].remove();
-            }
+function createBreadCrumb(addedDirName = "") {
+    var col = $('#breadcrumb_row > .col-12');
+    //only append
+    if(addedDirName != ""){
+        var separator = $("<span class='bc_separator'></span>").text(SEPARATORSYMBOL);
+        var path = $("<span class='bc_path' id='bc_path" + ++_PATHID + "'></span>").text(addedDirName);
+        col.append(separator,path);
+    }
+    //rewriting
+    else{
+        var breadCrumbElements = $("#breadcrumb_row span[class^='bc']");
+        if(breadCrumbElements){
+            breadCrumbElements.remove();
         }
-        var path = document.createElement("span");
-        path.classList.add("bc_path");
-        path.innerHTML = "Root";
-        path.setAttribute("id","bc_path0");
-        col.appendChild(path);
-        if (CURRENTPATH != "/"){
+        var rootPath = $("<span class='bc_path' id='bc_path0'></span>").text("Root");
+        col.append(rootPath);
+        if(CURRENTPATH != "/"){
             var pathArray = CURRENTPATH.slice(1, CURRENTPATH.length - 1).split("/");
-            var pathId = 1;
             for (var i = 0; i < pathArray.length; i++) {
-                var separator = document.createElement("span");
-                separator.classList.add("bc_separator");
-                separator.innerHTML = SEPARATORSYMBOL;
-                col.appendChild(separator);
-                var path = document.createElement("span");
-                path.classList.add("bc_path");
-                path.setAttribute("id","bc_path" + pathId);
-                pathId++;
-                path.innerHTML = pathArray[i];
-                col.appendChild(path);
+                var separator = $("<span class='bc_separator'></span>").text(SEPARATORSYMBOL);
+                var path = $("<span class='bc_path' id='bc_path" + (i + 1) + "'></span>").text(pathArray[i]);
+                col.append(separator,path);
             }
         }
     }
     //bind event function to bc_paths
     var bcPaths = document.querySelectorAll("#breadcrumb_row .bc_path");
-    var bcPathsLength = bcPaths.length;
-    if (bcPathsLength == 1){
-        bcPaths[0].addEventListener("click",jumpToBCPath);
+    if (bcPaths.length == 1){
+        bcPaths[0].addEventListener("click",breadCrumbClickHandler,{once:true});
     }else{
-        for(var i = 0; i < bcPathsLength - 1; i++){
-            bcPaths[i].addEventListener("click",jumpToBCPath);
+        for(var i = 0; i < bcPaths.length - 1; i++){
+            bcPaths[i].addEventListener("click",breadCrumbClickHandler,{once:true});
         }
     }
 }
-
+// event handler function
 function folderRowDblClickHandler(ev) {
-    var dirName = jumpToDir(ev);
-    createBreadCrumb(dirName);
+    jumpToDir(ev);
 }
-
 function entryRowClickHandler(ev) {
     selected(ev);
 }
-
-function entryRowRightClickHandler(ev){
+function entryContainerRightClickHandler(ev){
     ev.stopPropagation();
-    selected(ev);
-    showEntryMenu(ev);
-    $(document).on("mousedown",hideEntryMenu);
+    if(ev.currentTarget == document.querySelector("#entry_container")){
+        showBlankMenu(ev);
+        document.addEventListener("mousedown",hideBlankMenu);
+    }else{
+        selected(ev);
+        showEntryMenu(ev);
+        document.addEventListener("mousedown",hideEntryMenu)
+    }
 }
-
-function blankAreaRightClickHandler(ev){
-    ev.stopPropagation();
-    showBlankMenu(ev);
-    $(document).on("mousedown",hideBlankMenu);
+function breadCrumbClickHandler(ev){
+    jumpToBCPath(ev);
 }
-
-function jumpToDir(ev) {
-    var target = ev.currentTarget.querySelector("div.media-body");
-    var dirName = target.innerHTML;
-    CURRENTPATH = CURRENTPATH + dirName + '/';
-    createDirTable(CURRENTPATH, JSONDATA);
-    return dirName;
+function openEntryHandler(ev){
+    var dirName = $("#" + ev.data.id).find(".media-body").text();
+    jumpToDir(ev,dirName);
+    hideEntryMenu(ev,true);
 }
-
+// Reusable function
+function jumpToDir(ev,dirName = "") {
+    if(dirName === ""){
+        var target = ev.currentTarget.querySelector("div.media-body");
+        var dirName = target.innerHTML;
+    }
+    CURRENTPATH = CURRENTPATH + dirName + "/";
+    createDirTable();
+    createBreadCrumb(dirName);
+}
 function toStandardSize(size) {
     if (size < 1024) {
         unit = "B";
@@ -240,8 +174,8 @@ function toStandardSize(size) {
     standard_size = size.toString() + " " + unit;
     return standard_size;
 }
-
 function jumpToBCPath(ev){
+    // update CURRENTPATH
     var target = ev.target;
     _PATHID = parseInt(target.id.slice(7));
     if(_PATHID == 0){
@@ -263,21 +197,37 @@ function selected(ev){
     }
     ev.currentTarget.classList.add("selected");
 }
-
 function showEntryMenu(ev){
+    ev.preventDefault();
+    var operatObjId = ev.currentTarget.id;
+    var entryMenuOpen = $("#entry_menu_open");
+    if(ev.currentTarget == document.querySelector("#entry_container > .file_row")){
+        if(entryMenuOpen.css("display") != "none"){
+            entryMenuOpen.css("display","none");
+        }
+    } else {
+        if(entryMenuOpen.css("display") == "none"){
+            entryMenuOpen.css("display","block");
+        }
+        // bind openEntryHandler to open element
+        $("#entry_menu_open").one("click",{id : operatObjId},openEntryHandler);
+    }
     $("#entry_menu").css({
         "left": ev.pageX,
         "top": ev.pageY,
         "display": "flex"
     });
-    ev.preventDefault();
+    // bind eventHandler to other entryMenuElement
 }
-
-function hideEntryMenu(ev){
-    $("#entry_menu").css("display","none");
-    $(document).off("mousedown",hideEntryMenu);
+function hideEntryMenu(ev,force){
+    if(force == true){
+        $("#entry_menu").css("display","none");
+    }
+    var notHideArea = $("#entry_menu");
+    if(!notHideArea.is(ev.target) && notHideArea.has(ev.target).length === 0){
+        $("#entry_menu").css("display","none");
+    }
 }
-
 function showBlankMenu(ev){
     $("#blank_menu").css({
         "left": ev.pageX,
@@ -286,8 +236,12 @@ function showBlankMenu(ev){
     });
     ev.preventDefault();
 }
-
-function hideBlankMenu(ev){
-    $("#blank_menu").css("display","none");
-    $(document).off("mousedown",hideBlankMenu);
+function hideBlankMenu(ev,force){
+    if(force == true){
+        $("#blank_menu").css("display","none");
+    }
+    var notHideArea = $("#blank_menu");
+    if(!notHideArea.is(ev.target) && notHideArea.has(ev.target).length === 0){
+        $("#blank_menu").css("display","none");
+    }
 }

@@ -3,7 +3,7 @@ html{
 }
 #breadcrumb_row .bc_separator,
 #breadcrumb_row .bc_path{
-    font-size: 20px;
+    font-size: 18px;
 }
 @media (min-width:450px) {
     html{
@@ -11,14 +11,13 @@ html{
     }
     #breadcrumb_row .bc_separator,
     #breadcrumb_row .bc_path{
-        font-size: 24px;
+        font-size: 22px;
     }
 }
 
 body{
     user-select: none;
 }
-
 .container-fluid button{
     margin: 0.25rem 0.25rem;
 }
@@ -27,24 +26,28 @@ body{
     display: none;
     position: absolute;
 }
-#breadcrumb_row .bc_separator{
+.bc_separator{
     padding: 0rem 0.25rem;
 }
-#breadcrumb_row .bc_path:hover{
-    background-color: rgb(241, 243, 244);
+.bc_path{
+    border-radius:10px;
+    padding: 0 0.3rem 0.2rem 0.3rem;
+}
+.bc_path:hover{
+    background-color: rgb(238, 238, 238);
     cursor: pointer;
 }
-
-#entry_container > div[class~="file_row"],
-#entry_container > div[class~="folder_row"],
+#breadcrumb_row .col-12{
+    padding-bottom: 0.3rem;
+}
+#entry_container > div[class~="entry_row"],
 #title_row{
     border-top: 1px solid rgb(232, 234, 237);
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
     cursor: default;
 }
-#entry_container > div[class~="file_row"]:hover,
-#entry_container > div[class~="folder_row"]:hover{
+#entry_container > div[class~="entry_row"]:hover{
     background-color: rgb(246, 250, 255);
 }
 #entry_container > div[class~="selected"],
@@ -58,4 +61,19 @@ body{
     width: 26px;
     height: 24px;
     margin-right: 0.5rem;
+}
+.mouse_menu{
+    background-color: white;
+    box-shadow: 2px 4px 8px rgba(0,0,0,0.2),-2px 4px 8px rgba(0,0,0,0.2);
+    border-radius:4px;
+}
+.mouse_menu_body{
+    padding: 0.4rem 0;
+}
+.mouse_menu_entry{
+    padding: 0.2rem 0.8rem;
+}
+.mouse_menu_entry:hover{
+    background-color: rgb(238, 238, 238);
+    cursor: pointer;
 }
