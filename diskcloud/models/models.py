@@ -23,7 +23,6 @@ def valid_user(username,pw_hashed):
 # return a 64bit Hexadecimal as pw_hashed
 def hash_sha3(password):
     import hashlib
-
     pw_hashed = hashlib.sha3_256(password.encode('utf-8')).hexdigest()
     return pw_hashed
 

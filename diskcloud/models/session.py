@@ -5,8 +5,9 @@ def create_session(session_name,session_value):
     session[session_name] = session_value
 
 def valid_session(session_name,correct_value):
-    if session_exise(session_name):
-        if correct_value == session[session_name]:
+    value = session_exise(session_name)
+    if value:
+        if correct_value == value:
             return True
         else:
             session.pop(session_name)
@@ -20,8 +21,9 @@ def get_value_session(session_name):
 
 def session_exise(session_name):
     try:
-        if session[session_name]:
-            return True
+        value = session[session_name]
+        if value:
+            return value
         return False
     except KeyError:
         return False

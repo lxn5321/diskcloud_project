@@ -70,26 +70,9 @@
 				<div class='mouse_menu_entry' id='blank_menu_upload_folder'>上传文件夹</div>
 			</div>
 		</div>
-
 		<script>
-		var CURRENTPATH = null;
-		var JSONDATA = null;
-	    var fetch_init = {credentials: "same-origin"};
-	    fetch("{{url_for('Api.MainApi',username = username)}}", fetch_init).then(function(response) {
-	        if (response.ok) {
-	            response.json().then(function(data) {
-	                CURRENTPATH = "/";
-	                JSONDATA = data;
-	                createDirTable();
-	                createBreadCrumb();
-	            })
-	        }
-	    });
-		document.querySelector("#logout_btn").addEventListener("click",function(){
-		    window.location.replace("{{url_for('DiskCloud.Login')}}?logout=1");
-		});
-		var SEPARATORSYMBOL = ">";
-		var _PATHID = 0;
+			var PARADICT = {}
+			PARADICT["username"] = "{{username}}";
 		</script>
 		<script src="{{url_for('DiskCloud.static',filename = 'js/jquery-3.3.1.min.js')}}"></script>
 		<script src="{{url_for('DiskCloud.static',filename = 'js/main_html.js')}}"></script>

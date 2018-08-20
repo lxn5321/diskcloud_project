@@ -1,3 +1,30 @@
+var CURRENTPATH = null;
+var JSONDATA = null;
+var SEPARATORSYMBOL = ">";
+var _PATHID = 0;
+
+// init all
+get_json('/');
+
+document.querySelector("#logout_btn").addEventListener("click",function(){
+    window.location.replace("/diskcloud/?logout=1");
+});
+
+function get_json(path){
+    fetch("/api/v1/p/" + PARADICT['username'] + path, {credentials: "same-origin"}).then(function(response) {
+        if (response.ok) {
+            response.json().then(function(data) {
+                CURRENTPATH = path;
+                JSONDATA = data;
+                createDirTable();
+                createBreadCrumb();
+            })
+        } else {
+            // pass
+        }
+    });
+}
+
 function createDirTable(path = CURRENTPATH, data = JSONDATA) {
     // If path != "/" and path ends with a slash, remove the slash
     var pathLength = path.length
@@ -12,29 +39,29 @@ function createDirTable(path = CURRENTPATH, data = JSONDATA) {
 
     var entryContainer = $("#entry_container");
     // create folder row
-    for (var n = 0; n < data[path].directories.length; n++) {
+    for (var n = 0; n < data.directories.length; n++) {
         var folderRow = $("<div class='row folder_row entry_row' id='folder_row" + (n + 1) + "'></div>");
         var nameCol = $("<div class='col-7 media d-flex align-items-center'></div>");
         var iconContainer = $("<div class='icon_container d-flex align-items-center justify-content-center'></div>");
         var icon = $("<div class='folder_icon'></div>");
-        var mediaBody = $("<div class='media-body'></div>").text(data[path].directories[n][0]);
+        var mediaBody = $("<div class='media-body'></div>").text(data.directories[n][0]);
         var sizeCol = $("<div class='col-2 d-flex align-items-center'></div>");
-        var mtimeCol = $("<div class='col-3 d-flex align-items-center'></div>").text(data[path].directories[n][1]);
+        var mtimeCol = $("<div class='col-3 d-flex align-items-center'></div>").text(data.directories[n][1]);
         iconContainer.append(icon);
         nameCol.append(iconContainer,mediaBody);
         folderRow.append(nameCol,sizeCol,mtimeCol);
         entryContainer.append(folderRow);
     }
     // create file row
-    for (var n = 0; n < data[path].files.length; n++) {
-        var fileName = data[path].files[n][0];
+    for (var n = 0; n < data.files.length; n++) {
+        var fileName = data.files[n][0];
         var fileRow = $("<div class='row file_row entry_row' id='file_row" + (n + 1) + "'></div>");
         var nameCol = $("<div class='col-7 media d-flex align-items-center'></div>");
         var iconContainer = $("<div class='icon_container d-flex align-items-center justify-content-center'></div>");
         var icon = $("<div></div>");
         var mediaBody = $("<div class='media-body'></div>").text(fileName);
-        var sizeCol = $("<div class='col-2 d-flex align-items-center'></div>").text(data[path].files[n][2]);
-        var mtimeCol = $("<div class='col-3 d-flex align-items-center'></div>").text(data[path].files[n][1]);
+        var sizeCol = $("<div class='col-2 d-flex align-items-center'></div>").text(toStandardSize(data.files[n][2]));
+        var mtimeCol = $("<div class='col-3 d-flex align-items-center'></div>").text(data.files[n][1]);
         // add icon by file name suffix
         var index = fileName.lastIndexOf(".");
         var suffix = fileName.slice(index + 1).toLowerCase();
@@ -151,12 +178,11 @@ function openEntryHandler(ev){
 // Reusable function
 function jumpToDir(ev,dirName = "") {
     if(dirName === ""){
-        var target = ev.currentTarget.querySelector("div.media-body");
+        var target = ev.currentTarget.querySelector(".media-body");
         var dirName = target.innerHTML;
     }
-    CURRENTPATH = CURRENTPATH + dirName + "/";
-    createDirTable();
-    createBreadCrumb(dirName);
+    path = CURRENTPATH + dirName + "/";
+    get_json(path);
 }
 function toStandardSize(size) {
     if (size < 1024) {
@@ -179,16 +205,15 @@ function jumpToBCPath(ev){
     var target = ev.target;
     _PATHID = parseInt(target.id.slice(7));
     if(_PATHID == 0){
-        CURRENTPATH = "/";
+        path = "/";
     }else{
         var index = 1;
         for(var i = 0; i < _PATHID; i++){
             index = CURRENTPATH.indexOf("/",index + 1);
         }
-        CURRENTPATH = CURRENTPATH.slice(0,index + 1);
+        path = CURRENTPATH.slice(0,index + 1);
     }
-    createDirTable();
-    createBreadCrumb();
+    get_json(path);
 }
 function selected(ev){
     var preSelected = document.querySelector("#entry_container > div[class~='selected']");

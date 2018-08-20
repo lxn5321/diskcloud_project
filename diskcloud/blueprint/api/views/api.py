@@ -1,25 +1,27 @@
-import os
-from flask import request,jsonify,abort
-from pathlib import PurePath
-from diskcloud.models.session import valid_session,delete_session as del_session
-from diskcloud.models.file import get_files_folder,walk_dir_json
+from flask import request,jsonify,abort,current_app
+from pathlib import Path
+from diskcloud.models.session import valid_session
+from diskcloud.models.file import walk_dir_json
+from diskcloud.models.response import gen_error_res
 
-def MainApi(username):
+def MainApi(dirpath):
+    username = dirpath.split('/',maxsplit=1)[0]
     if valid_session('username',username):
-        user_path = PurePath(get_files_folder(),username)
-        if os.path.exists(user_path):
+        dirpath = Path(current_app.config['FILES_FOLDER'],dirpath)
+        if dirpath.exists():
             if request.method == 'GET':
-                json_obj = walk_dir_json(user_path)
-                return jsonify(json_obj)
+                if dirpath.is_dir():
+                    json_obj = walk_dir_json(dirpath)
+                    return jsonify(json_obj)
+                elif dirpath.is_file():
+                    pass
+                else:
+                    return gen_error_res(401,'invalid path')
             if request.method == 'POST':
                 pass
         else:
-            response = jsonify({'reason': 'path cannot be found'})
-            response.status_code = 404
-            return response
-    response = jsonify({'reason': 'invalid session'})
-    response.status_code = 401
-    return response
+            return gen_error_res(404,'path cannot be found')
+    return gen_error_res(401,'invalid session')
 
-def GenerateLink(username):
+def GenerateLink():
     pass
