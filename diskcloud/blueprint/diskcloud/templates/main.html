@@ -70,11 +70,30 @@
 				<div class='mouse_menu_entry' id='blank_menu_upload_folder'>上传文件夹</div>
 			</div>
 		</div>
+		<div class="modal fade" id="download_confirm_modal" tabindex="-1" role="dialog">
+		  <div class="modal-dialog" role="document">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <h5 class="modal-title">确认下载</h5>
+		      </div>
+		      <div class="modal-body">
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+		        <button type="button" class="btn btn-primary">
+					下载
+		        </button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+		<a download id="hiden_link">下载</a>
 		<script>
-			var PARADICT = {}
+			var PARADICT = {};
 			PARADICT["username"] = "{{username}}";
 		</script>
 		<script src="{{url_for('DiskCloud.static',filename = 'js/jquery-3.3.1.min.js')}}"></script>
+		<script src="{{url_for('DiskCloud.static',filename = 'js/bootstrap.min.js')}}"></script>
 		<script src="{{url_for('DiskCloud.static',filename = 'js/main_html.js')}}"></script>
 	</body>
 </html>

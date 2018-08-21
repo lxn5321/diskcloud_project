@@ -1,29 +1,27 @@
-import os
-from pathlib import Path
-from flask import current_app
-import time
+from flask import send_from_directory,current_app
 
-#return Pathlib.concrete paths class
+def file_resource(path):
+    path_str = path.resolve().as_posix()
+    arr = path_str.rsplit('/',maxsplit=1)
+    dirpath = arr[0]
+    filename = arr[1]
+    return  send_from_directory(dirpath,filename,as_attachment=True)
 
-def walk_dir_json(path):
-    dirs_list = []
-    files_list = []
-    for c_path in path.iterdir():
-        if c_path.is_dir():
-            dir_name = c_path.name
-            dir_mtime = get_mtime(c_path)
-            dirs_list.append([dir_name,dir_mtime])
-        if c_path.is_file():
-            file_name = c_path.name
-            file_mtime = get_mtime(c_path)
-            file_size = get_size(c_path)
-            files_list.append([file_name,file_mtime,file_size])
-    return {'directories': dirs_list,'files': files_list}
-
-def get_mtime(path):
-    mtime = path.stat().st_mtime
-    mtime_s = time.strftime("%y-%m-%d %H:%M",time.localtime(mtime))
-    return mtime_s
-
-def get_size(path):
-    return path.stat().st_size
+def compress_resource(path,url_path):
+    import tarfile
+    import pathlib
+    tar_path = pathlib.Path(current_app.config['COMPRESS_FOLDER'], url_path + '.tar')
+    tar_path_str = tar_path.resolve().as_posix()
+    pathlib.Path(tar_path.parent).mkdir(parents=True,exist_ok=True)
+    try:
+        with tarfile.open(tar_path_str,'x') as tar:
+            tar.add(path,arcname=path.name)
+    except FileExistsError:
+        pass
+    arr = tar_path_str.rsplit('/',maxsplit=1)
+    dirpath = arr[0]
+    filename = arr[1]
+    return  send_from_directory(dirpath,filename,as_attachment=True)
+    # path_str = path.resolve().as_posix()
+    # if path_str.endswith('/'):
+    #     path_str = path_str.rsplit('/',maxsplit=1)[0]

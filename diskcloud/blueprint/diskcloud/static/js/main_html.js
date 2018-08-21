@@ -11,7 +11,7 @@ document.querySelector("#logout_btn").addEventListener("click",function(){
 });
 
 function get_json(path){
-    fetch("/api/v1/p/" + PARADICT['username'] + path, {credentials: "same-origin"}).then(function(response) {
+    fetch("/api/v1/json/" + PARADICT["username"] + path, {credentials: "same-origin"}).then(function(response) {
         if (response.ok) {
             response.json().then(function(data) {
                 CURRENTPATH = path;
@@ -105,13 +105,16 @@ function createDirTable(path = CURRENTPATH, data = JSONDATA) {
     $("#entry_container > .folder_row").on({
         dblclick: folderRowDblClickHandler
     });
+    $(".mouse_menu").on({
+        contextmenu: mouseMenuRightClickHandler
+    })
+    $("#entry_container").on({
+        contextmenu: entryContainerRightClickHandler
+    })
     $("#entry_container > .entry_row").on({
         click: entryRowClickHandler,
         contextmenu: entryContainerRightClickHandler
     });
-    $("#entry_container").on({
-        contextmenu: entryContainerRightClickHandler
-    })
 }
 
 function createBreadCrumb(addedDirName = "") {
@@ -158,22 +161,44 @@ function entryRowClickHandler(ev) {
 }
 function entryContainerRightClickHandler(ev){
     ev.stopPropagation();
-    if(ev.currentTarget == document.querySelector("#entry_container")){
+    if (ev.currentTarget.id == "entry_container"){
         showBlankMenu(ev);
-        document.addEventListener("mousedown",hideBlankMenu);
-    }else{
+        $(document).off().one("mousedown",hideBlankMenu);
+    } else {
         selected(ev);
         showEntryMenu(ev);
-        document.addEventListener("mousedown",hideEntryMenu)
+        $(document).off().one("mousedown",hideEntryMenu)
     }
 }
 function breadCrumbClickHandler(ev){
     jumpToBCPath(ev);
 }
 function openEntryHandler(ev){
-    var dirName = $("#" + ev.data.id).find(".media-body").text();
-    jumpToDir(ev,dirName);
     hideEntryMenu(ev,true);
+    var dirName = document.querySelector("#" + ev.data.id + " .media-body").innerHTML;
+    jumpToDir(ev,dirName);
+}
+function downloadEntryHandler(ev){
+    hideEntryMenu(ev,true);
+    var name = document.querySelector("#" + ev.data.id + " .media-body").innerHTML;
+    var path = "/api/v1/file/" + PARADICT["username"] + CURRENTPATH + name;
+    var modalBody = document.querySelector("#download_confirm_modal .modal-body");
+    var modal = $("#download_confirm_modal");
+    if(ev.data.id.includes("file_row")){
+        modalBody.innerHTML = "确认下载该文件吗？";
+    } else {
+        modalBody.innerHTML = "确认下载该文件夹吗？";
+    }
+    $("#hiden_link").attr("href",path);
+    $("#download_confirm_modal .btn-primary").off().one("click",function(){
+        document.querySelector("#hiden_link").click();
+        modal.modal('hide');
+    });
+    modal.modal('show');
+}
+function mouseMenuRightClickHandler(ev){
+    ev.preventDefault();
+    ev.stopPropagation();
 }
 // Reusable function
 function jumpToDir(ev,dirName = "") {
@@ -225,8 +250,9 @@ function selected(ev){
 function showEntryMenu(ev){
     ev.preventDefault();
     var operatObjId = ev.currentTarget.id;
+    // if it is file_row,don't display open function
     var entryMenuOpen = $("#entry_menu_open");
-    if(ev.currentTarget == document.querySelector("#entry_container > .file_row")){
+    if(operatObjId.includes("file_row")){
         if(entryMenuOpen.css("display") != "none"){
             entryMenuOpen.css("display","none");
         }
@@ -235,7 +261,7 @@ function showEntryMenu(ev){
             entryMenuOpen.css("display","block");
         }
         // bind openEntryHandler to open element
-        $("#entry_menu_open").one("click",{id : operatObjId},openEntryHandler);
+        $("#entry_menu_open").off().one("click",{id : operatObjId},openEntryHandler);
     }
     $("#entry_menu").css({
         "left": ev.pageX,
@@ -243,6 +269,7 @@ function showEntryMenu(ev){
         "display": "flex"
     });
     // bind eventHandler to other entryMenuElement
+    $("#entry_menu_download").off().one("click",{id : operatObjId},downloadEntryHandler);
 }
 function hideEntryMenu(ev,force){
     if(force == true){
@@ -254,12 +281,12 @@ function hideEntryMenu(ev,force){
     }
 }
 function showBlankMenu(ev){
+    ev.preventDefault();
     $("#blank_menu").css({
         "left": ev.pageX,
         "top": ev.pageY,
         "display": "flex"
     });
-    ev.preventDefault();
 }
 function hideBlankMenu(ev,force){
     if(force == true){

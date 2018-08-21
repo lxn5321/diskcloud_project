@@ -77,3 +77,10 @@ body{
     background-color: rgb(238, 238, 238);
     cursor: pointer;
 }
+#download_confirm_modal .btn-primary a{
+    text-decoration:none;
+    color:white;
+}
+#hiden_link{
+    display: none;
+}

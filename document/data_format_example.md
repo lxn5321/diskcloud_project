@@ -9,7 +9,6 @@ length is 8-64 bytes -->
 
 password: ^[a-zA-Z0-9_!@#$%,\+\-\^\.]{8,64}$
 
-<!-- The first letter cannot be "."
-If there is space, it is one and only one between every two valid elements
+<!-- If there is space, it is one and only one between every two valid elements
 length is 1-64bytes,can only be detected by python-->
-path: ^[a-zA-Z0-9_!@#$%,\+\-\^]{1}([ ]?[a-zA-Z0-9_!@#$%,\+\-\^\.]){0,63}$
+dir_name: ^[a-zA-Z0-9_!@#$%,\+\-\^]{1}([ ]?[a-zA-Z0-9_!@#$%,\+\-\^]){0,63}$
