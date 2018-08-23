@@ -1,99 +1,168 @@
-<!DOCTYPE html>
+<!DOCTYPE html> {% set icons_url = url_for('DiskCloud.static',filename = 'icons/icons.png') %}
 <html lang="zh">
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-		<link rel="icon" href="{{url_for('DiskCloud.static',filename = 'icons/cloud_icon_32.png')}}">
 
-		<style>
-		{% set icons_url = url_for('DiskCloud.static',filename = 'icons/icons.png') %}
-		.apk_icon{width:21px;height:24px;background: url("{{icons_url}}") no-repeat -21px -69px;}
-		.code_icon{width:21px;height:24px;background: url("{{icons_url}}") no-repeat -63px -48px;}
-		.doc_icon{width:21px;height:24px;background: url("{{icons_url}}") no-repeat -63px -24px;}
-		.exe_icon{width:21px;height:24px;background: url("{{icons_url}}") no-repeat -63px -0px;}
-		.folder_icon{width:26px;height:21px;background: url("{{icons_url}}") no-repeat -0px -0px;}
-		.image_icon{width:21px;height:24px;background: url("{{icons_url}}") no-repeat -42px -24px;}
-		.music_icon{width:21px;height:24px;background: url("{{icons_url}}") no-repeat -42px -0px;}
-		.pdf_icon{width:21px;height:24px;background: url("{{icons_url}}") no-repeat -42px -48px;}
-		.tar_icon{width:21px;height:24px;background: url("{{icons_url}}") no-repeat -21px -45px;}
-		.torrent_icon{width:21px;height:24px;background: url("{{icons_url}}") no-repeat -21px -21px;}
-		.txt_icon{width:21px;height:24px;background: url("{{icons_url}}") no-repeat -0px -69px;}
-		.unknow_icon{width:21px;height:24px;background: url("{{icons_url}}") no-repeat -0px -45px;}
-		.video_icon{width:21px;height:24px;background: url("{{icons_url}}") no-repeat -0px -21px;}
-		.zip_icon{width:20px;height:19px;background: url("{{icons_url}}") no-repeat -42px -72px;}
-		</style>
-		<link rel="stylesheet" href="{{url_for('DiskCloud.static',filename = 'css/bootstrap.min.css')}}">
-		<link rel="stylesheet" href="{{url_for('DiskCloud.static',filename = 'css/main_html.css')}}">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<link rel="icon" href="{{url_for('DiskCloud.static',filename = 'icons/cloud_icon_32.png')}}">
+	<link rel="stylesheet" href="{{url_for('DiskCloud.static',filename = 'css/bootstrap.min.css')}}">
+	<link rel="stylesheet" href="{{url_for('DiskCloud.static',filename = 'css/main_html.css')}}">
+	<link rel='preload' as='image' href="{{icons_url}}" />
 
-		<title>DiskCloud</title>
-	</head>
-	<body>
-		<div class="container-fluid">
-			<div class="row justify-content-end">
-				<button type="button" class="btn btn-success" id="logout_btn">注销</button>
+	<style>
+		.apk_icon {
+			width: 21px;
+			height: 24px;
+			background: url("{{icons_url}}") no-repeat -21px -69px;
+		}
+		.code_icon {
+			width: 21px;
+			height: 24px;
+			background: url("{{icons_url}}") no-repeat -63px -48px;
+		}
+		.doc_icon {
+			width: 21px;
+			height: 24px;
+			background: url("{{icons_url}}") no-repeat -63px -24px;
+		}
+		.exe_icon {
+			width: 21px;
+			height: 24px;
+			background: url("{{icons_url}}") no-repeat -63px -0px;
+		}
+		.folder_icon {
+			width: 26px;
+			height: 21px;
+			background: url("{{icons_url}}") no-repeat -0px -0px;
+		}
+		.image_icon {
+			width: 21px;
+			height: 24px;
+			background: url("{{icons_url}}") no-repeat -42px -24px;
+		}
+		.music_icon {
+			width: 21px;
+			height: 24px;
+			background: url("{{icons_url}}") no-repeat -42px -0px;
+		}
+		.pdf_icon {
+			width: 21px;
+			height: 24px;
+			background: url("{{icons_url}}") no-repeat -42px -48px;
+		}
+		.tar_icon {
+			width: 21px;
+			height: 24px;
+			background: url("{{icons_url}}") no-repeat -21px -45px;
+		}
+		.torrent_icon {
+			width: 21px;
+			height: 24px;
+			background: url("{{icons_url}}") no-repeat -21px -21px;
+		}
+		.txt_icon {
+			width: 21px;
+			height: 24px;
+			background: url("{{icons_url}}") no-repeat -0px -69px;
+		}
+		.unknow_icon {
+			width: 21px;
+			height: 24px;
+			background: url("{{icons_url}}") no-repeat -0px -45px;
+		}
+		.video_icon {
+			width: 21px;
+			height: 24px;
+			background: url("{{icons_url}}") no-repeat -0px -21px;
+		}
+		.zip_icon {
+			width: 20px;
+			height: 19px;
+			background: url("{{icons_url}}") no-repeat -42px -72px;
+		}
+		.checked_icon {
+			width: 16px;
+			height: 16px;
+			background: url("{{icons_url}}") no-repeat -84px -0px;
+		}
+		.error_icon {
+			width: 16px;
+			height: 16px;
+			background: url("{{icons_url}}") no-repeat -84px -16px;
+		}
+	</style>
+
+	<title>DiskCloud</title>
+</head>
+
+<body>
+	<div class="container-fluid">
+		<div class="row justify-content-end">
+			<button type="button" class="btn btn-success logout_btn">注销</button>
+		</div>
+	</div>
+	<div class="container entry_container">
+		<div class="row breadcrumb_row">
+			<div class="col-12">
 			</div>
 		</div>
-		<div class="container" id="entry_container">
-			<div class="row" id="breadcrumb_row">
-				<div class="col-12">
+		<div class="row title_row">
+			<div class="col-7">
+				名称
+			</div>
+			<div class="col-2">
+				大小
+			</div>
+			<div class="col-3">
+				修改日期
+			</div>
+		</div>
+	</div>
+	<div class='mouse_menu entry_menu'>
+		<div class='mouse_menu_title entry_menu_title'></div>
+		<div class='mouse_menu_body entry_menu_body'>
+			<div class='mouse_menu_entry entry_menu_open'>打开</div>
+			<div class='mouse_menu_entry entry_menu_download'>下载</div>
+			<div class='mouse_menu_entry entry_menu_share'>分享</div>
+			<div class='mouse_menu_entry entry_menu_move'>移动到...</div>
+			<div class='mouse_menu_entry entry_menu_delete'>删除</div>
+			<div class='mouse_menu_entry entry_menu_rename'>重命名</div>
+		</div>
+	</div>
+	<div class='mouse_menu blank_menu'>
+		<div class='mouse_menu_title blank_menu_title'></div>
+		<div class='mouse_menu_body blank_menu_body'>
+			<div class='mouse_menu_entry blank_menu_create_file'>新建文件</div>
+			<div class='mouse_menu_entry blank_menu_create_foler'>新建文件夹</div>
+			<div class='mouse_menu_entry blank_menu_upload_file'>上传文件</div>
+			<div class='mouse_menu_entry blank_menu_upload_folder'>上传文件夹</div>
+		</div>
+	</div>
+	<div class="modal fade confirm_modal" tabindex="-1" role="dialog">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title"></h5>
+				</div>
+				<div class="modal-body">
+				</div>
+				<div class="modal-footer">
 				</div>
 			</div>
-			<div class="row" id="title_row">
-				<div class="col-7">
-					名称
-				</div>
-				<div class="col-2">
-					大小
-				</div>
-				<div class="col-3">
-					修改日期
-				</div>
-			</div>
 		</div>
-		<div class='mouse_menu' id='entry_menu'>
-			<div class='mouse_menu_title' id='entry_menu_title'></div>
-			<div class='mouse_menu_body' id='entry_menu_body'>
-				<div class='mouse_menu_entry' id='entry_menu_open'>打开</div>
-				<div class='mouse_menu_entry' id='entry_menu_download'>下载</div>
-				<div class='mouse_menu_entry' id='entry_menu_share'>分享</div>
-				<div class='mouse_menu_entry' id='entry_menu_move'>移动到...</div>
-				<div class='mouse_menu_entry' id='entry_menu_delete'>删除</div>
-				<div class='mouse_menu_entry' id='entry_menu_rename'>重命名</div>
-			</div>
-		</div>
-		<div class='mouse_menu' id='blank_menu'>
-			<div class='mouse_menu_title' id='blank_menu_title'></div>
-			<div class='mouse_menu_body' id='blank_menu_body'>
-				<div class='mouse_menu_entry' id='blank_menu_create_file'>新建文件</div>
-				<div class='mouse_menu_entry' id='blank_menu_create_foler'>新建文件夹</div>
-				<div class='mouse_menu_entry' id='blank_menu_upload_file'>上传文件</div>
-				<div class='mouse_menu_entry' id='blank_menu_upload_folder'>上传文件夹</div>
-			</div>
-		</div>
-		<div class="modal fade" id="download_confirm_modal" tabindex="-1" role="dialog">
-		  <div class="modal-dialog" role="document">
-		    <div class="modal-content">
-		      <div class="modal-header">
-		        <h5 class="modal-title">确认下载</h5>
-		      </div>
-		      <div class="modal-body">
-		      </div>
-		      <div class="modal-footer">
-		        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
-		        <button type="button" class="btn btn-primary">
-					下载
-		        </button>
-		      </div>
-		    </div>
-		  </div>
-		</div>
-		<a download id="hiden_link">下载</a>
-		<script>
-			var PARADICT = {};
-			PARADICT["username"] = "{{username}}";
-		</script>
-		<script src="{{url_for('DiskCloud.static',filename = 'js/jquery-3.3.1.min.js')}}"></script>
-		<script src="{{url_for('DiskCloud.static',filename = 'js/bootstrap.min.js')}}"></script>
-		<script src="{{url_for('DiskCloud.static',filename = 'js/main_html.js')}}"></script>
-	</body>
+	</div>
+	<script>
+		var PARADICT = {};
+		PARADICT["username"] = "{{username}}";
+		PARADICT["logout_url"] = "{{url_for('DiskCloud.Login')}}?logout=1";
+		PARADICT["share_url"] = "{{url_for('DiskCloud.Share',sid='1',_external=True)}}".slice(0, -2);
+		PARADICT["json_url"] = "{{url_for('Api.Json',url_path='1')}}".slice(0, -2);
+		PARADICT["file_url"] = "{{url_for('Api.File',url_path='1')}}".slice(0, -2);
+		PARADICT["generate_url"] = "{{url_for('Api.Generate',url_path='1')}}".slice(0, -2);
+	</script>
+	<script src="{{url_for('DiskCloud.static',filename = 'js/jquery-3.3.1.min.js')}}"></script>
+	<script src="{{url_for('DiskCloud.static',filename = 'js/bootstrap.min.js')}}"></script>
+	<script src="{{url_for('DiskCloud.static',filename = 'js/main_html.js')}}"></script>
+</body>
+
 </html>

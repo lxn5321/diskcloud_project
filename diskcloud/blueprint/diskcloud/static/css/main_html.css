@@ -1,17 +1,23 @@
-html{
+.title_row,
+.logout_btn {
     font-size: 14px;
 }
-#breadcrumb_row .bc_separator,
-#breadcrumb_row .bc_path{
-    font-size: 18px;
+.breadcrumb_row{
+    font-size: 20px;
 }
-@media (min-width:450px) {
-    html{
+.entry_row{
+    font-size: 14px;
+}
+@media (min-width:500px) {
+    .title_row,
+    .logout_btn {
         font-size: 16px;
     }
-    #breadcrumb_row .bc_separator,
-    #breadcrumb_row .bc_path{
+    .breadcrumb_row{
         font-size: 22px;
+    }
+    .entry_row{
+        font-size: 15px;
     }
 }
 
@@ -21,8 +27,8 @@ body{
 .container-fluid button{
     margin: 0.25rem 0.25rem;
 }
-#entry_menu,
-#blank_menu{
+.entry_menu,
+.blank_menu{
     display: none;
     position: absolute;
 }
@@ -37,27 +43,27 @@ body{
     background-color: rgb(238, 238, 238);
     cursor: pointer;
 }
-#breadcrumb_row .col-12{
+.breadcrumb_row .col-12{
     padding-bottom: 0.3rem;
 }
-#entry_container > div[class~="entry_row"],
-#title_row{
+.entry_container > div[class~="entry_row"],
+.title_row{
     border-top: 1px solid rgb(232, 234, 237);
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
     cursor: default;
 }
-#entry_container > div[class~="entry_row"]:hover{
+.entry_container > div[class~="entry_row"]:hover{
     background-color: rgb(246, 250, 255);
 }
-#entry_container > div[class~="selected"],
-#entry_container > div[class~="selected"]:hover{
+.entry_container > div[class~="selected"],
+.entry_container > div[class~="selected"]:hover{
     background-color: rgb(232, 240, 254);
 }
-#entry_container > .media{
+.entry_container > .media{
     padding-left: 0.5rem;
 }
-#entry_container .media .icon_container{
+.entry_container .media .icon_container{
     width: 26px;
     height: 24px;
     margin-right: 0.5rem;
@@ -81,6 +87,15 @@ body{
     text-decoration:none;
     color:white;
 }
-#hiden_link{
+.hiden_link{
     display: none;
+}
+#share_confirm_modal .modal-body .form-check-inline{
+    margin-left: 0.3rem;
+}
+#radio1{
+    margin-left: 0.8rem;
+}
+#success_hint,#fail_hint{
+    margin-left: 0.3rem;
 }
