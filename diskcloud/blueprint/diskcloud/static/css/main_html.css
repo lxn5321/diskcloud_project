@@ -1,28 +1,44 @@
 .title_row,
-.logout_btn {
+.logout_btn,
+.confirm_modal,
+.mouse_menu,
+.modal-body,
+.entry_row,
+.confirm_modal .small_folder_container{
     font-size: 14px;
+}
+.modal-title{
+    font-size: 16px;
 }
 .breadcrumb_row{
     font-size: 20px;
 }
-.entry_row{
-    font-size: 14px;
-}
 @media (min-width:500px) {
     .title_row,
-    .logout_btn {
+    .logout_btn,
+    .mouse_menu,
+    .entry_row,
+    .modal-body{
         font-size: 16px;
     }
     .breadcrumb_row{
         font-size: 22px;
     }
-    .entry_row{
+    .confirm_modal .small_folder_container{
         font-size: 15px;
+    }
+    .modal-title{
+        font-size: 18px;
     }
 }
 
 body{
     user-select: none;
+}
+.media{
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 .container-fluid button{
     margin: 0.25rem 0.25rem;
@@ -46,22 +62,37 @@ body{
 .breadcrumb_row .col-12{
     padding-bottom: 0.3rem;
 }
-.entry_container > div[class~="entry_row"],
-.title_row{
+.entry_container > .entry_row,
+.entry_container > .title_row{
     border-top: 1px solid rgb(232, 234, 237);
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
     cursor: default;
 }
-.entry_container > div[class~="entry_row"]:hover{
+.confirm_modal .small_folder_container > .small_folder_row{
+    border-top: 0.5px solid rgb(232, 234, 237);
+    padding-top: 0.2rem;
+    padding-bottom: 0.2rem;
+    padding-left: 0.5rem;
+    cursor: default;
+}
+.confirm_modal .small_folder_container > .small_folder_row_root{
+    border-top: none;
+}
+.entry_container > .entry_row:hover,
+.confirm_modal .small_folder_container > .small_folder_row:hover{
     background-color: rgb(246, 250, 255);
 }
-.entry_container > div[class~="selected"],
-.entry_container > div[class~="selected"]:hover{
+.entry_container > .selected,
+.entry_container > .selected:hover,
+.confirm_modal .small_folder_container > .selected,
+.confirm_modal .small_folder_container > .selected:hover{
     background-color: rgb(232, 240, 254);
 }
-.entry_container > .media{
-    padding-left: 0.5rem;
+.small_folder_button,
+.small_folder_icon,
+.small_folder_blank{
+    margin-right: 0.2rem;
 }
 .entry_container .media .icon_container{
     width: 26px;
@@ -90,7 +121,7 @@ body{
 .hiden_link{
     display: none;
 }
-#share_confirm_modal .modal-body .form-check-inline{
+#confirm_modal .modal-body .form-check-inline{
     margin-left: 0.3rem;
 }
 #radio1{
@@ -98,4 +129,57 @@ body{
 }
 #success_hint,#fail_hint{
     margin-left: 0.3rem;
+}
+#rename_input{
+    margin-left: 0.8rem;
+}
+
+.small_folder_blank{
+    width: 12px;
+    height: 12px;
+}
+/* animated plus */
+.small_folder_button {
+    position: relative;
+    top: 6px;
+    left: 6px;
+    width: 12px;
+    height: 12px;
+    background: #007BFF;
+    -webkit-transform: translate(-50%, -50%) rotate(0deg);
+    transform: translate(-50%, -50%) rotate(0deg);
+    border-radius: 25%;
+    z-index: 100;
+    -webkit-transition: 0.4s cubic-bezier(0.2, 0.6, 0.3, 1.1);
+    transition: 0.4s cubic-bezier(0.2, 0.6, 0.3, 1.1);
+}
+.small_folder_button:after {
+    position: absolute;
+    content: '';
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    top: 50%;
+    left: 50%;
+    height: 2px;
+    width: 50%;
+    background: white;
+}
+.small_folder_button:before {
+    position: absolute;
+    content: '';
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    top: 50%;
+    left: 50%;
+    height: 50%;
+    width: 2px;
+    background: white;
+}
+.small_folder_button.clicked {
+    -webkit-transform: translate(-50%, -50%) rotate(180deg);
+    transform: translate(-50%, -50%) rotate(180deg);
+    background: #28A745;
+}
+.small_folder_button.clicked:before {
+    width: 0;
 }

@@ -1,6 +1,6 @@
 from flask import redirect,url_for,request,render_template
 from diskcloud.models.session import valid_session,create_session
-from diskcloud.models.verification import get_username_cookie
+from diskcloud.models.cookie import get_username_cookie
 
 def Main(username):
     if valid_session('username',username):

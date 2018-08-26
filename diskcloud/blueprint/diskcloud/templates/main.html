@@ -1,10 +1,12 @@
-<!DOCTYPE html> {% set icons_url = url_for('DiskCloud.static',filename = 'icons/icons.png') %}
+<!DOCTYPE html>
+{% set icons_url = url_for('DiskCloud.static',filename = 'icons/icons.png') %}
 <html lang="zh">
 
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<link rel="icon" href="{{url_for('DiskCloud.static',filename = 'icons/cloud_icon_32.png')}}">
+	<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css"> -->
 	<link rel="stylesheet" href="{{url_for('DiskCloud.static',filename = 'css/bootstrap.min.css')}}">
 	<link rel="stylesheet" href="{{url_for('DiskCloud.static',filename = 'css/main_html.css')}}">
 	<link rel='preload' as='image' href="{{icons_url}}" />
@@ -80,7 +82,7 @@
 			height: 19px;
 			background: url("{{icons_url}}") no-repeat -42px -72px;
 		}
-		.checked_icon {
+		.success_icon {
 			width: 16px;
 			height: 16px;
 			background: url("{{icons_url}}") no-repeat -84px -0px;
@@ -89,6 +91,21 @@
 			width: 16px;
 			height: 16px;
 			background: url("{{icons_url}}") no-repeat -84px -16px;
+		}
+		.checked_icon{
+			width:14px;
+			height:14px;
+			background: url("{{icons_url}}") no-repeat -32px -93px;
+		}
+		.unchecked_icon{
+			width:14px;
+			height:14px;
+			background: url("{{icons_url}}") no-repeat -18px -93px;
+		}
+		.small_folder_icon{
+			width:18px;
+			height:15px;
+			background: url("{{icons_url}}") no-repeat -0px -93px;
 		}
 	</style>
 
@@ -125,8 +142,8 @@
 			<div class='mouse_menu_entry entry_menu_download'>下载</div>
 			<div class='mouse_menu_entry entry_menu_share'>分享</div>
 			<div class='mouse_menu_entry entry_menu_move'>移动到...</div>
-			<div class='mouse_menu_entry entry_menu_delete'>删除</div>
 			<div class='mouse_menu_entry entry_menu_rename'>重命名</div>
+			<div class='mouse_menu_entry entry_menu_delete'>删除</div>
 		</div>
 	</div>
 	<div class='mouse_menu blank_menu'>
@@ -142,7 +159,9 @@
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h5 class="modal-title"></h5>
+					<div class="modal-title"></div>
+				</div>
+				<div class="modal-prompt">
 				</div>
 				<div class="modal-body">
 				</div>
@@ -155,13 +174,12 @@
 		var PARADICT = {};
 		PARADICT["username"] = "{{username}}";
 		PARADICT["logout_url"] = "{{url_for('DiskCloud.Login')}}?logout=1";
+		PARADICT["file_api_url"] = "{{url_for('Api.FileApi',path='1')}}".slice(0, -2);
 		PARADICT["share_url"] = "{{url_for('DiskCloud.Share',sid='1',_external=True)}}".slice(0, -2);
-		PARADICT["json_url"] = "{{url_for('Api.Json',url_path='1')}}".slice(0, -2);
-		PARADICT["file_url"] = "{{url_for('Api.File',url_path='1')}}".slice(0, -2);
-		PARADICT["generate_url"] = "{{url_for('Api.Generate',url_path='1')}}".slice(0, -2);
 	</script>
+	<!-- <script src="https://cdn.jsdelivr.net/combine/npm/jquery@3.3.1,npm/bootstrap@4.1.3/dist/js/bootstrap.min.js"></script> -->
 	<script src="{{url_for('DiskCloud.static',filename = 'js/jquery-3.3.1.min.js')}}"></script>
-	<script src="{{url_for('DiskCloud.static',filename = 'js/bootstrap.min.js')}}"></script>
+	<script src="{{url_for('DiskCloud.static',filename = 'js/bootstrap.bundle.min.js')}}"></script>
 	<script src="{{url_for('DiskCloud.static',filename = 'js/main_html.js')}}"></script>
 </body>
 

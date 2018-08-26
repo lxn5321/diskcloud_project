@@ -1,8 +1,9 @@
 from flask import request,redirect,render_template,url_for,make_response
 
 from diskcloud.models.session import create_session,get_value_session,delete_session as del_session
-from diskcloud.models.verification import get_username_cookie,valid_username,valid_password,valid_user,set_cookie_id
+from diskcloud.models.valid import valid_username,valid_password,valid_user
 from diskcloud.models.string import hash_sha3
+from diskcloud.models.cookie import get_username_cookie,set_cookie_id
 
 def Login():
     if request.method == 'POST':

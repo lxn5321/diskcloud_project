@@ -1,0 +1,8 @@
+.checked{top:0px;left:0px;
+width:14px;height:14px;background: url("icons.png") no-repeat -32px -93px;}
+.icons{top:0px;left:0px;
+width:100px;height:93px;background: url("icons.png") no-repeat -0px -0px;}
+.smallfolder{top:0px;left:0px;
+width:18px;height:15px;background: url("icons.png") no-repeat -0px -93px;}
+.unchecked{top:0px;left:0px;
+width:14px;height:14px;background: url("icons.png") no-repeat -18px -93px;}

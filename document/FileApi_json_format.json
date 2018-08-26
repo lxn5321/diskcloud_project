@@ -1,3 +1,4 @@
+Info('/') return:
 {
   "directories": [
     [
@@ -20,4 +21,12 @@
       30
     ]
   ]
+}
+
+FolderInfo('/') return:
+{
+    "dirA":{
+        "dirC": "0"
+    },
+    "dirB": "0"
 }
