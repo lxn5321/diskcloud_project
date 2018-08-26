@@ -1,47 +1,48 @@
-.title_row,
-.logout_btn,
-.confirm_modal,
-.mouse_menu,
-.modal-body,
-.entry_row,
+#logout_btn,
 .confirm_modal .small_folder_container{
     font-size: 14px;
 }
+.entry_row{
+    font-size: 14px;
+}
+.mouse_menu,
+.confirm_modal,
 .modal-title{
     font-size: 16px;
 }
+.title_row{
+    font-size: 18px;
+}
 .breadcrumb_row{
-    font-size: 20px;
+    font-size: 21px;
 }
-@media (min-width:500px) {
-    .title_row,
-    .logout_btn,
-    .mouse_menu,
-    .entry_row,
-    .modal-body{
-        font-size: 16px;
-    }
-    .breadcrumb_row{
-        font-size: 22px;
-    }
-    .confirm_modal .small_folder_container{
-        font-size: 15px;
-    }
-    .modal-title{
-        font-size: 18px;
-    }
+html{
+    height: 100%;
 }
-
 body{
     user-select: none;
+    height: 100%;
+}
+.whole-container{
+    padding: 0;
+    height: 100%;
+}
+.top-container{
+    display: flex;
+    justify-content: flex-end;
+    padding: 0.3rem 0.5rem 0 0.3rem;
+}
+.top-container #logout_btn{
+    width: 52px;
+    height: 35px;
+}
+.entry-container{
+    overflow: auto;
 }
 .media{
     display: flex;
     justify-content: center;
     align-items: center;
-}
-.container-fluid button{
-    margin: 0.25rem 0.25rem;
 }
 .entry_menu,
 .blank_menu{
@@ -62,29 +63,32 @@ body{
 .breadcrumb_row .col-12{
     padding-bottom: 0.3rem;
 }
-.entry_container > .entry_row,
-.entry_container > .title_row{
+.entry-container > .entry_row,
+.entry-container > .title_row{
     border-top: 1px solid rgb(232, 234, 237);
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
     cursor: default;
 }
+.modal-body{
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
 .confirm_modal .small_folder_container > .small_folder_row{
-    border-top: 0.5px solid rgb(232, 234, 237);
-    padding-top: 0.2rem;
-    padding-bottom: 0.2rem;
+    padding-top: 0.3rem;
+    padding-bottom: 0.3rem;
     padding-left: 0.5rem;
     cursor: default;
 }
 .confirm_modal .small_folder_container > .small_folder_row_root{
     border-top: none;
 }
-.entry_container > .entry_row:hover,
+.entry-container > .entry_row:hover,
 .confirm_modal .small_folder_container > .small_folder_row:hover{
     background-color: rgb(246, 250, 255);
 }
-.entry_container > .selected,
-.entry_container > .selected:hover,
+.entry-container > .selected,
+.entry-container > .selected:hover,
 .confirm_modal .small_folder_container > .selected,
 .confirm_modal .small_folder_container > .selected:hover{
     background-color: rgb(232, 240, 254);
@@ -94,7 +98,7 @@ body{
 .small_folder_blank{
     margin-right: 0.2rem;
 }
-.entry_container .media .icon_container{
+.entry-container .media .icon_container{
     width: 26px;
     height: 24px;
     margin-right: 0.5rem;

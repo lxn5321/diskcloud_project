@@ -2,17 +2,22 @@ var CURRENTPATH = null;
 var JSONDATA = null;
 var SEPARATORSYMBOL = ">";
 var _PATHID = 0;
-
 // init all
 init_all()
 
+window.onresize = function(ev){
+    resize();
+}
+
 function init_all(){
     draw_all('/');
-    document.querySelector(".logout_btn").addEventListener("click",function(){
-        window.location.replace(PARADICT["logout_url"]);
-    });
+    resize();
     $(".mouse_menu").on({
         contextmenu: mouseMenuRightClickHandler
+    });
+
+    $("#logout_btn").click(function(){
+        window.location.replace(PARADICT["logout_url"]);
     });
 }
 function draw_all(path){
@@ -23,6 +28,13 @@ function draw_all(path){
         createBreadCrumb();
     }
     get_info_json(path,exec_func);
+}
+function resize(){
+    W = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+    H = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+    $(".entry-container").css({
+        height: H - 40
+    })
 }
 function get_info_json(path,exec_func=null){
     fetch(PARADICT["file_api_url"] + PARADICT["username"] + path + '?info=1', {credentials: "same-origin"}).then(function(response) {
@@ -66,7 +78,7 @@ function error_message(mes,jsondata=null){
     return '<div class="media"><div class="error_icon"></div><div class="rename_fail_hint text-danger">' + mes + '\n' + jsondata.err_mes + '</div></div>';
 }
 function createDirTable(path = CURRENTPATH, data = JSONDATA) {
-    var entryContainer = $(".entry_container");
+    var entryContainer = $(".entry-container");
     var entryRow = entryContainer.find(".entry_row");
     var cacheArray = new Array();
     // var pathLength = path.length
@@ -143,7 +155,7 @@ function createDirTable(path = CURRENTPATH, data = JSONDATA) {
     }
     entryContainer.append(cacheArray);
     //bind event function to element
-    entryContainer.on({
+    $(".whole-container").on({
         contextmenu: entryContainerRightClickHandler
     })
     entryContainer.find(".folder_row").on({
@@ -259,32 +271,52 @@ function showEntryMenu(ev){
     $(".entry_menu_move").off().one("click",{id: entryId},moveEntryHandler);
     $(".entry_menu_rename").off().one("click",{id: entryId},renameEntryHandler);
     // display entry menu
+    if(H - ev.pageY < 195){
+        $(".entry_menu").css("top",ev.pageY - 195);
+    } else{
+        $(".entry_menu").css("top",ev.pageY);
+    }
+
     $(".entry_menu").css({
         "left": ev.pageX,
-        "top": ev.pageY,
+        "display": "flex"
+    });
+}
+function showBlankMenu(ev){
+    ev.preventDefault();
+    var entryId = ev.currentTarget.id;
+
+    $(".blank_menu_create_file").off().one("click",{id: entryId},createFileHandler);
+    $(".blank_menu_create_folder").off().one("click",{id: entryId},createFolderHandler);
+    $(".blank_menu_upload_file").off().one("click",{id: entryId},uploadFileHandler);
+    $(".blank_menu_upload_folder").off().one("click",{id: entryId},uploadFolderHandler);
+
+    if(H - ev.pageY < 134){
+        $(".blank_menu").css("top",ev.pageY - 134);
+    } else{
+        $(".blank_menu").css("top",ev.pageY);
+    }
+    if(W - ev.pageX < 105){
+        $(".blank_menu").css("left",ev.pageX - 105);
+    } else{
+        $(".blank_menu").css("left",ev.pageX);
+    }
+    $(".blank_menu").css({
         "display": "flex"
     });
 }
 function hideEntryMenu(ev,force){
     var entryMenu = $(".entry_menu");
-    if(force == true){
+    if(force === true){
         entryMenu.css("display","none");
     }
     if(!entryMenu.is(ev.target) && entryMenu.has(ev.target).length === 0){
         entryMenu.css("display","none");
     }
 }
-function showBlankMenu(ev){
-    ev.preventDefault();
-    $(".blank_menu").css({
-        "left": ev.pageX,
-        "top": ev.pageY,
-        "display": "flex"
-    });
-}
 function hideBlankMenu(ev,force){
     var blankMenu = $(".blank_menu");
-    if(force == true){
+    if(force === true){
         blankMenu.css("display","none");
     }
     if(!blankMenu.is(ev.target) && blankMenu.has(ev.target).length === 0){
@@ -296,16 +328,16 @@ function folderRowDblClickHandler(ev) {
     jumpToDir(ev);
 }
 function entryRowClickHandler(ev) {
-    selected(ev,".entry_container > .selected");
+    selected(ev,".entry-container > .selected");
 }
 function entryContainerRightClickHandler(ev){
     ev.stopPropagation();
-    unselected(".entry_container > .selected");
-    if (ev.currentTarget.classList.contains("entry_container")){
+    unselected(".entry-container > .selected");
+    if (ev.currentTarget.classList.contains("whole-container")){
         showBlankMenu(ev);
         $(document).off().one("mousedown",hideBlankMenu);
     } else {
-        selected(ev,".entry_container > .selected");
+        selected(ev,".entry-container > .selected");
         showEntryMenu(ev);
         $(document).off().one("mousedown",hideEntryMenu)
     }
@@ -407,7 +439,7 @@ function moveEntryHandler(ev){
                 function drawSmallFolder(data,count,folderpath,insertedElement='anything'){
                     var keys = Object.keys(data);
                     var container = $('<div class="small_folder_container"></div>');
-                    container.attr("id","small_folder_container" + folderpath.split('/').join('_'));
+                    container.data("folderpath",folderpath);
                     if(count == 0){
                         var smallFolderRowRoot = $('<div class="row small_folder_row small_folder_row_root selected"></div>');
                         smallFolderRowRoot.data("folderpath","/");
@@ -461,7 +493,12 @@ function moveEntryHandler(ev){
                             drawSmallFolder(folderData,count+1,folderpath,ev.currentTarget);
                             $(ev.currentTarget).data("inited","1");
                         }else{
-                            var childContainer = container.find("#small_folder_container"+folderpath.split('/').join('_'));
+                            var childContainers = container.find(".small_folder_container");
+                            for(var i = 0; i < childContainers.length; i++){
+                                if($(childContainers[i]).data("folderpath") == folderpath){
+                                    var childContainer = $(childContainers[i])
+                                }
+                            }
                             childContainer.toggle();
                         }
                         $(this).find(".small_folder_button").toggleClass("clicked");
@@ -537,7 +574,7 @@ function renameEntryHandler(ev){
     // add content
     modalTitle.text("重命名");
     modalPrompt.text("");
-    modalBody.html('<label for="rename_input">请为其输入新名称:</label><input type="text" id="rename_input" value="'+name+'" size=35 autofocus=true>');
+    modalBody.html('<label for="rename_input">请为其输入新名称:</label><input type="text" id="rename_input" value="'+name+'" size=40 autofocus=true>');
     modalFooter.html('<button type="button" class="btn btn-primary">确认</button><button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>');
     var confirmButton = modalFooter.find('.btn-primary');
     var renamePromo = modalBody.find('#rename_promo');
@@ -611,6 +648,22 @@ function deleteEntryHandler(ev){
         })
     });
     modal.modal('show');
+}
+function createFileHandler(ev){
+    alert("still develop");
+    hideBlankMenu(ev,true);
+}
+function createFolderHandler(ev){
+    alert("still develop");
+    hideBlankMenu(ev,true);
+}
+function uploadFileHandler(ev){
+    alert("still develop");
+    hideBlankMenu(ev,true);
+}
+function uploadFolderHandler(ev){
+    alert("still develop");
+    hideBlankMenu(ev,true);
 }
 function mouseMenuRightClickHandler(ev){
     ev.preventDefault();
