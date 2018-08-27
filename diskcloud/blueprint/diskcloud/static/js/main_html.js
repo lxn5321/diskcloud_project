@@ -33,7 +33,7 @@ function resize(){
     W = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
     H = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
     $(".entry-container").css({
-        height: H - 40
+        height: H - 41
     })
 }
 function get_info_json(path,exec_func=null){

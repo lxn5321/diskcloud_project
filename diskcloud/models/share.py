@@ -44,7 +44,7 @@ def generate_id_return(succeed,value):
         return {'succeed': False, 'reason': value}
 
 def valid_sid(sid):
-    from diskcloud.models.verification import re_match
+    from diskcloud.models.valid import re_match
     from diskcloud.models.mysql import select_execute
 
     if re_match('[a-zA-Z0-9]{8}',sid):
