@@ -1,8 +1,14 @@
 SECRET_KEY = b'examplekey'
 # TESTING = True
 SEND_FILE_MAX_AGE_DEFAULT = 86400
+PERMANENT_SESSION_LIFETIME = 86400
 MYSQL_HOST = yourhost
 MYSQL_USERNAME = yourusername
 MYSQL_PASSWORD = yourpassword
-FILES_FOLDER = './test_folder/'
+FILES_FOLDER = 'test_folder/'
+COMPRESS_FOLDER = 'test_compress_folder/'
 SERVER_NAME = 'domain:port'
+SESSION_COOKIE_DOMAIN = 'domain:port'
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+# SESSION_COOKIE_SECURE=True
