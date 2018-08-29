@@ -1,2 +1,2 @@
 FLASK_APP=diskcloud
-FLASK_ENV=development
+FLASK_ENV=production

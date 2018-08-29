@@ -16,7 +16,7 @@ def Login():
             if request.form.get('enable_cookie',False):
                 cookie_id = set_cookie_id(username)
                 if cookie_id:
-                    response.set_cookie('login_id',cookie_id,86400,path='/diskcloud',httponly=True,secure=True,samesite='Lax')
+                    response.set_cookie('login_id',cookie_id,86400,domain='bliker.ga',path='/diskcloud',httponly=True,secure=True,samesite='Lax')
                 else:
                     return render_template('error.html',err_mes = 'Setting cooike failed')
             return response
