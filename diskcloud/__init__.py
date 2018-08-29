@@ -1,4 +1,4 @@
-def create_app():
+def create_app(conf=None):
     from flask import Flask
 
     app = Flask(__name__)
@@ -7,20 +7,18 @@ def create_app():
     # def check_config():
     #     pass
 
-    # default config
-    app.config.from_mapping(
-        SECRET_KEY = 'default',
-        TESTING = True,
-    )
     #import config from file
     app.config.from_pyfile('config/config.py',silent=True)
+
+    if conf is not None:
+        app.config.from_pyfile(conf,silent=True)
 
     # add blueprint
     from .blueprint.api.bp import api_bp
     from .blueprint.diskcloud.bp import diskcloud_bp
 
     app.register_blueprint(diskcloud_bp, url_prefix='/diskcloud/')
-    app.register_blueprint(api_bp, url_prefix='/api/v1/')
+    app.register_blueprint(api_bp, url_prefix='/diskcloud/api/')
 
     # add url route
     # from .views.settings import Settings

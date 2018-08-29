@@ -8,6 +8,15 @@ body{
     background-color: #f5f5f5;
     display: flex;
     flex-direction: column;
+    align-items: center;
+}
+.unselected{
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* other */
 }
 .title{
     margin-top: -10px;
@@ -15,14 +24,13 @@ body{
 .form-signin {
   width: 100%;
   max-width: 300px;
-  padding-left: 20px;
-  padding-right: 20px;
-  padding-bottom: 150px;
+  padding-left: 1.5em;
+  padding-right: 1.5em;
   margin: auto;
+  padding-bottom: 5em;
 }
 .form-signin .form-control {
   position: relative;
-  box-sizing: border-box;
   height: auto;
   padding: 8px;
   font-size: 14px;
@@ -30,21 +38,18 @@ body{
 .form-signin .form-control:focus {
   z-index: 2;
 }
-.form-signin input[type="text"]{
+.form-signin #input_username{
     margin-bottom: -1px;
     border-bottom-right-radius: 0;
     border-bottom-left-radius: 0;
 }
-.form-signin input[type="password"] {
+.form-signin #input_password {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
 }
 .form-signin button{
-    width: 50%;
-    margin-left: 25%;
-}
-.footer{
-    align-self: center;
+    width: 40%;
+    margin-left: 30%;
 }
 .footer p{
     margin-bottom: 0;

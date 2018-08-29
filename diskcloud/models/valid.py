@@ -16,10 +16,12 @@ def valid_password(password):
 def valid_user(username,pw_hashed):
     from diskcloud.models.mysql import select_execute
 
-    pw = select_execute('select password from user where username = %s',(username,))
-    if pw == False:
+    if len(username) > 32:
         return False
-    if pw[0] == pw_hashed:
+    result = select_execute('select password from user where username = %s',(username,))
+    if result is False:
+        return False
+    if result[0] == pw_hashed:
         return True
     return False
 

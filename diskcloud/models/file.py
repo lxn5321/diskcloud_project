@@ -1,31 +1,36 @@
 def download(path_str,is_file=None):
-    from flask import send_from_directory,current_app
+    from flask import current_app,make_response
     from pathlib import Path
     from tarfile import open
-    from urllib.parse import quote
+    # from urllib.parse import quote
+    from diskcloud.models.response import gen_error_res
 
     if isinstance(path_str,Path):
         file_path = path_str
         path_str = file_path.relative_to(current_app.config['FILES_FOLDER']).as_posix()
     else:
         file_path = Path(current_app.config['FILES_FOLDER'],path_str)
-    if is_file == None:
+    if is_file is None:
         if file_path.exists():
             if file_path.is_file():
                 is_file = True
             else:
                 is_file = False
         else:
-            raise ValueError('invalid path,path is not file or dir.')
+            return gen_error_res('invalid path,path is not file or dir.',404)
 
-    if is_file == True:
-        arr = file_path.resolve().as_posix().rsplit('/',maxsplit=1)
-        dirpath = arr[0]
-        filename = arr[1]
-        response = send_from_directory(dirpath,filename)
-        filename_escape = quote(filename)
-        response.headers['Content-Disposition'] = "attachment;filename=" + filename_escape + ";filename*=UTF-8''" + filename_escape
+    if is_file is True:
+        whole_path = file_path.resolve().as_posix()
+        response = make_response('')
+        response.headers['X-Accel-Redirect'] = whole_path
         return response
+        # arr = file_path.resolve().as_posix().rsplit('/',maxsplit=1)
+        # dirpath = arr[0]
+        # filename = arr[1]
+        # response = send_from_directory(dirpath,filename)
+        # filename_escape = quote(filename)
+        # response.headers['Content-Disposition'] = "attachment;filename=" + filename_escape + ";filename*=UTF-8''" + filename_escape
+        # return response
     else:
         tar_path = Path(current_app.config['COMPRESS_FOLDER'], path_str + '.tar')
         tar_path_str = tar_path.resolve().as_posix()
@@ -35,13 +40,17 @@ def download(path_str,is_file=None):
                 tar.add(file_path,arcname=file_path.name)
         except FileExistsError:
             pass
-        arr = tar_path_str.rsplit('/',maxsplit=1)
-        dirpath = arr[0]
-        filename = arr[1]
-        response = send_from_directory(dirpath,filename)
-        filename_escape = quote(filename)
-        response.headers['Content-Disposition'] = "attachment;filename=" + filename_escape + ";filename*=UTF-8''" + filename_escape
+        whole_path = tar_path_str
+        response = make_response('')
+        response.headers['X-Accel-Redirect'] = whole_path
         return response
+        # arr = tar_path_str.rsplit('/',maxsplit=1)
+        # dirpath = arr[0]
+        # filename = arr[1]
+        # response = send_from_directory(dirpath,filename)
+        # filename_escape = quote(filename)
+        # response.headers['Content-Disposition'] = "attachment;filename=" + filename_escape + ";filename*=UTF-8''" + filename_escape
+        # return response
 
 def get_info(path_str):
     from pathlib import Path
