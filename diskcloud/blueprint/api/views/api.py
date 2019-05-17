@@ -144,8 +144,6 @@ class FileApi(views.MethodView):
         result = valid_url_path(url_path, True)
         if isinstance(result,dict):
             if result['is_file'] == False:
-                if 'file' not in request.files:
-                    return gen_error_res("no file part")
                 files = request.files
                 if len(files) == 0:
                     return gen_error_res("no selected file")
@@ -153,6 +151,6 @@ class FileApi(views.MethodView):
                     result = save_file(url_path, files[i])
                     if result != True:
                         return result
-                return ('',200)
+                return ('', 200)
             return gen_error_res("path must be a dir",400)
         return result

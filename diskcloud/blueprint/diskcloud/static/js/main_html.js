@@ -757,13 +757,50 @@ function uploadFileHandler(ev){
 function uploadFilesHandler(files){
     var formData = new FormData();
     var url = PARADICT["file_api_url"] + PARADICT["username"] + CURRENTPATH + "?upload_files=1"
+    var re = /^[\w\u4e00-\u9fa5!@#$%,\+\-\^]{1}([ ]?[\w\u4e00-\u9fa5!@#$%,.\+\-\^])*[ ]?[\w\u4e00-\u9fa5!@#$%,\+\-\^]{1}$/;
+    var modal = $(".confirm_modal");
+    var modalTitle = modal.find(".modal-title");
+    var modalPrompt = modal.find(".modal-prompt");
+    var modalBody = modal.find(".modal-body");
+    var modalFooter = modal.find(".modal-footer");
+    var same = false;
+    var valid = true;
+
+    modalFooter.html('<button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>');
+
     for (var i = 0; i < files.length; i++){
-        formData.append('file', files[i])
+        if(have_same_file(files[i].name,JSONDATA)){
+          same = true;
+          modalTitle.text("上传失败");
+          modalBody.html(error_message("当前目录内有与上传文件相同名称的文件或者文件夹."));
+          break;
+        }
+        if(!re.test(files[i].name) || files[i].name.length > 128){
+          valid = false;
+          modalTitle.text("上传失败");
+          modalBody.html(error_message("上传文件名称不合法."));
+          break;
+        }
+        formData.append('file'+i, files[i]);
     }
-    fetch(url,{credentials: "same-origin", method: "POST", body: formData})
-    .then(function(response){
-      
-    })
+    if(!same && valid){
+      fetch(url,{credentials: "same-origin", method: "POST", body: formData})
+      .then(function(response){
+        if(response.ok){
+          modalTitle.text("上传成功");
+          modalBody.html(success_message("已成功上传文件"));
+          draw_all('/');
+        }else {
+          response.json().then(function(data){
+            modalTitle.text("上传失败");
+            modalBody.html(error_message("上传失败.",data));
+          })
+        }
+      })
+    }
+    
+    $("#fileElem").val('');
+    modal.modal('show');
 }
 function mouseMenuRightClickHandler(ev){
     ev.preventDefault();

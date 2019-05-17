@@ -21,10 +21,10 @@ def download(path,is_file=None):
         else:
             return gen_error_res('invalid path,path is not file or dir.',404)
 
-    if is_file is True:
+    if is_file is True and current_app.config['TESTING'] == False:
         content_length = get_size(file_path)
         content_mime = get_mime(file_path)
-    else:
+    if is_file is False:
         sub_path = Path(current_app.config['COMPRESS_FOLDER'], sub_path + '.tar').as_posix()
         tar_path = Path(current_app.config['FILES_FOLDER'], sub_path)
         tar_path_str = tar_path.resolve().as_posix()
@@ -33,12 +33,24 @@ def download(path,is_file=None):
             with open(tar_path_str,'x') as tar:
                 tar.add(file_path,arcname=file_path.name)
         except FileExistsError:
-            pass
-        content_length = get_size(tar_path)
-        content_mime = "application/x-tar"
+            from os import remove
+            
+            remove(tar_path_str)
+            with open(tar_path_str,'x') as tar:
+                tar.add(file_path,arcname=file_path.name)
+        if current_app.config['TESTING'] == False:
+            content_length = get_size(tar_path)
+            content_mime = "application/x-tar"
+
+    filename = sub_path.rsplit('/',maxsplit=1)[1]
+
+    if current_app.config['TESTING'] == True:
+        from flask import send_from_directory
+
+        dirname = Path(current_app.config['FILES_FOLDER'], sub_path).resolve().as_posix().rsplit('/',maxsplit=1)[0]
+        return send_from_directory(dirname, filename, as_attachment=True)
 
     response = make_response('')
-    filename = sub_path.rsplit('/',maxsplit=1)[1]
     filename_escape = quote(filename)
     response.headers['X-Accel-Redirect'] = current_app.config['NGINX_X_ACCEL_REDIRECT'] + sub_path
     response.headers['Content-Disposition'] = "attachment;filename=" + filename_escape + ";filename*=UTF-8''" + filename_escape
