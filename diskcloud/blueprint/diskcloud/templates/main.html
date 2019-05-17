@@ -152,7 +152,6 @@
 			<div class='mouse_menu_entry blank_menu_create_file'>新建文件</div>
 			<div class='mouse_menu_entry blank_menu_create_folder'>新建文件夹</div>
 			<div class='mouse_menu_entry blank_menu_upload_file'>上传文件</div>
-			<div class='mouse_menu_entry blank_menu_upload_folder'>上传文件夹</div>
 		</div>
 	</div>
 	<div class="modal fade confirm_modal" tabindex="-1" role="dialog">
@@ -170,6 +169,7 @@
 			</div>
 		</div>
 	</div>
+	<input type="file" id="fileElem" multiple  onchange="uploadFilesHandler(this.files)">
 	<script>
 		var PARADICT = {};
 		PARADICT["username"] = "{{username}}";

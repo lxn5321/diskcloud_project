@@ -135,7 +135,7 @@ body{
     text-decoration:none;
     color:white;
 }
-.hiden_link{
+.hiden_link,#fileElem{
     display: none;
 }
 #confirm_modal .modal-body .form-check-inline{

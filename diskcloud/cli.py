@@ -34,8 +34,8 @@ def init_db(force):
             raise e
     c.execute('create database diskcloud')
     c.execute('use diskcloud')
-    c.execute('CREATE TABLE `user` (`username` VARCHAR(32) NOT NULL,`password` CHAR(64) NOT NULL,`cookie_id` CHAR(64) NULL DEFAULT NULL,PRIMARY KEY (`username`)) COLLATE="utf8mb4_0900_ai_ci" ENGINE=InnoDB;')
-    c.execute('CREATE TABLE `share` (`sid` CHAR(8) NOT NULL,`username` VARCHAR(32) NOT NULL,`path` VARCHAR(1350) NOT NULL,`expire_time` CHAR(12) NOT NULL,PRIMARY KEY (`sid`),INDEX `FK_share_user` (`username`),CONSTRAINT `FK_share_user` FOREIGN KEY (`username`) REFERENCES `user` (`username`)) COLLATE="utf8mb4_0900_ai_ci" ENGINE=InnoDB;')
+    c.execute('CREATE TABLE `user` (`username` VARCHAR(32) NOT NULL,`password` CHAR(64) NOT NULL,`cookie_id` CHAR(64) NULL DEFAULT NULL,PRIMARY KEY (`username`)) COLLATE="utf8_general_ci" ENGINE=InnoDB')
+    c.execute('CREATE TABLE `share` (`sid` CHAR(8) NOT NULL,`username` VARCHAR(32) NOT NULL,`path` VARCHAR(1350) NOT NULL,`expire_time` CHAR(12) NOT NULL,PRIMARY KEY (`sid`),INDEX `FK_share_user` (`username`),CONSTRAINT `FK_share_user` FOREIGN KEY (`username`) REFERENCES `user` (`username`)) COLLATE="utf8_general_ci" ENGINE=InnoDB')
     c.close()
     db.close()
     click.echo("init db success!")

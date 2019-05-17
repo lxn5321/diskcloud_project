@@ -19,6 +19,14 @@ function init_all(){
     $("#logout_btn").click(function(){
         window.location.replace(PARADICT["logout_url"]);
     });
+
+    $(".confirm_modal").on('shown.bs.modal', function () {
+        $('#name_input').focus();
+    })
+
+    $(".blank_menu_create_file").on("click", createFileHandler);
+    $(".blank_menu_create_folder").on("click", createFolderHandler);
+    $(".blank_menu_upload_file").on("click", uploadFileHandler);
 }
 function draw_all(path){
     CURRENTPATH = path;
@@ -37,7 +45,8 @@ function resize(){
     })
 }
 function get_info_json(path,exec_func=null){
-    fetch(PARADICT["file_api_url"] + PARADICT["username"] + path + '?info=1', {credentials: "same-origin"}).then(function(response) {
+    fetch(PARADICT["file_api_url"] + PARADICT["username"] + path + '?info=1', {credentials: "same-origin"})
+    .then(function(response) {
         if (response.ok) {
             response.json().then(function(data) {
                 if(exec_func != null){
@@ -73,9 +82,9 @@ function success_message(mes){
 }
 function error_message(mes,jsondata=null){
     if(jsondata === null){
-        return '<div class="media"><div class="error_icon"></div><div class="rename_fail_hint text-danger">' + mes + '</div></div>';
+        return '<div class="media"><div class="error_icon"></div><div class="fail_hint text-danger">' + mes + '</div></div>';
     }
-    return '<div class="media"><div class="error_icon"></div><div class="rename_fail_hint text-danger">' + mes + '\n' + jsondata.err_mes + '</div></div>';
+    return '<div class="media"><div class="error_icon"></div><div class="fail_hint text-danger">' + mes + '\n' + jsondata.err_mes + '</div></div>';
 }
 function createDirTable(path = CURRENTPATH, data = JSONDATA) {
     var entryContainer = $(".entry-container");
@@ -156,14 +165,15 @@ function createDirTable(path = CURRENTPATH, data = JSONDATA) {
     entryContainer.append(cacheArray);
     //bind event function to element
     $(".whole-container").on({
-        contextmenu: entryContainerRightClickHandler
+      click: wholeContainerClickHandler,
+      contextmenu: wholeContainerRightClickHandler
     })
     entryContainer.find(".folder_row").on({
-        dblclick: folderRowDblClickHandler
+      dblclick: folderRowDblClickHandler
     });
     entryContainer.find(".entry_row").on({
-        click: entryRowClickHandler,
-        contextmenu: entryContainerRightClickHandler
+      click: wholeContainerClickHandler,
+      contextmenu: wholeContainerRightClickHandler
     });
 }
 function createBreadCrumb(addedDirName = "") {
@@ -276,6 +286,11 @@ function showEntryMenu(ev){
     } else{
         $(".entry_menu").css("top",ev.pageY);
     }
+    if(W - ev.pageX < 84){
+        $(".blank_menu").css("left",ev.pageX - 84);
+    } else{
+        $(".blank_menu").css("left",ev.pageX);
+    }
 
     $(".entry_menu").css({
         "left": ev.pageX,
@@ -284,12 +299,6 @@ function showEntryMenu(ev){
 }
 function showBlankMenu(ev){
     ev.preventDefault();
-    var entryId = ev.currentTarget.id;
-
-    $(".blank_menu_create_file").off().one("click",{id: entryId},createFileHandler);
-    $(".blank_menu_create_folder").off().one("click",{id: entryId},createFolderHandler);
-    $(".blank_menu_upload_file").off().one("click",{id: entryId},uploadFileHandler);
-    $(".blank_menu_upload_folder").off().one("click",{id: entryId},uploadFolderHandler);
 
     if(H - ev.pageY < 134){
         $(".blank_menu").css("top",ev.pageY - 134);
@@ -327,19 +336,24 @@ function hideBlankMenu(ev,force){
 function folderRowDblClickHandler(ev) {
     jumpToDir(ev);
 }
-function entryRowClickHandler(ev) {
-    selected(ev,".entry-container > .selected");
-}
-function entryContainerRightClickHandler(ev){
+function wholeContainerClickHandler(ev) {
     ev.stopPropagation();
-    unselected(".entry-container > .selected");
     if (ev.currentTarget.classList.contains("whole-container")){
-        showBlankMenu(ev);
-        $(document).off().one("mousedown",hideBlankMenu);
+      unselected(".entry-container > .selected");
     } else {
-        selected(ev,".entry-container > .selected");
-        showEntryMenu(ev);
-        $(document).off().one("mousedown",hideEntryMenu)
+      selected(ev,".entry-container > .selected");
+    }
+}
+function wholeContainerRightClickHandler(ev){
+    ev.stopPropagation();
+    if (ev.currentTarget.classList.contains("whole-container")){
+      unselected(".entry-container > .selected");
+      showBlankMenu(ev);
+      $(document).off().one("mousedown",hideBlankMenu);
+    } else {
+      selected(ev,".entry-container > .selected");
+      showEntryMenu(ev);
+      $(document).off().one("mousedown",hideEntryMenu)
     }
 }
 function breadCrumbClickHandler(ev){
@@ -389,7 +403,8 @@ function shareEntryHandler(ev){
     var confirmButton = modalFooter.find('.btn-primary');
     confirmButton.one("click",function(){
         var life = modalBody.find("input:checked").val();
-        fetch(url + '&life=' + life,{credentials: "same-origin"}).then(function(response){
+        fetch(url + '&life=' + life,{credentials: "same-origin"})
+        .then(function(response){
             confirmButton.css("display","none");
             if (response.ok) {
                 response.json().then(function(data) {
@@ -433,7 +448,8 @@ function moveEntryHandler(ev){
     modalFooter.html('<button type="button" class="btn btn-primary">确认</button><button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>');
     var confirmButton = modalFooter.find(".btn-primary");
     var folder_info_url = PARADICT["file_api_url"] + PARADICT["username"] + '/?folder_info=1';
-    fetch(folder_info_url,{credentials: "same-origin", method: "GET"}).then(function(response){
+    fetch(folder_info_url,{credentials: "same-origin", method: "GET"})
+    .then(function(response){
         if(response.ok){
             response.json().then(function(data){
                 function drawSmallFolder(data,count,folderpath,insertedElement='anything'){
@@ -523,14 +539,16 @@ function moveEntryHandler(ev){
                     if(bf_array[bf_last_index] == af_array[bf_last_index]){
                         modalPrompt.html(error_message("不能将文件夹移动到本身或者子文件夹内"));
                     }else{
-                        fetch(PARADICT["file_api_url"] + after_path + '?info=1', {credentials: "same-origin"}).then(function(response) {
+                        fetch(PARADICT["file_api_url"] + after_path + '/?info=1', {credentials: "same-origin"})
+                        .then(function(response) {
                             if (response.ok) {
                                 response.json().then(function(data) {
                                     let have_same = have_same_file(name,data)
                                     if(have_same === true){
                                         modalPrompt.html(error_message("该文件夹内有同名的文件或文件夹，无法移动"));
                                     } else {
-                                        fetch(PARADICT["file_api_url"] + before_path + '/', {credentials: "same-origin", method: "PATCH", body: JSON.stringify({af_path: after_path}), headers: {'content-type': 'application/json'}}).then(function(response){
+                                        fetch(PARADICT["file_api_url"] + before_path + '/', {credentials: "same-origin", method: "PATCH", body: JSON.stringify({af_path: after_path}), headers: {'content-type': 'application/json'}})
+                                        .then(function(response){
                                             confirmButton.css("display","none");
                                             if(response.ok){
                                                 modalPrompt.text("");
@@ -574,23 +592,21 @@ function renameEntryHandler(ev){
     // add content
     modalTitle.text("重命名");
     modalPrompt.text("");
-    modalBody.html('<label for="rename_input">请为其输入新名称:</label><input type="text" id="rename_input" value="'+name+'" size=40 autofocus=true>');
+    modalBody.html('<label for="name_input">请为其输入新名称:</label><input type="text" id="name_input" value="'+name+'" size=40>');
     modalFooter.html('<button type="button" class="btn btn-primary">确认</button><button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>');
     var confirmButton = modalFooter.find('.btn-primary');
-    var renamePromo = modalBody.find('#rename_promo');
-    var rename_fail_hint = modalBody.find('#rename_fail_hint')
-    renamePromo.css("display","none");
     confirmButton.off().on("click",function(){
-        after_name = document.querySelector("#rename_input").value;
+        after_name = document.querySelector("#name_input").value;
         if(ev.data.id.includes("file_row")){
             var re = /^[\w\u4e00-\u9fa5!@#$%,\+\-\^]{1}([ ]?[\w\u4e00-\u9fa5!@#$%,.\+\-\^])*[ ]?[\w\u4e00-\u9fa5!@#$%,\+\-\^]{1}$/;
         }else{
             var re = /^[\w\u4e00-\u9fa5!@#$%,\+\-\^]{1}([ ]?[\w\u4e00-\u9fa5!@#$%,\+\-\^])*$/;
         }
         var have_same = have_same_file(after_name,JSONDATA);
-        if(re.test(after_name) && !have_same){
+        if(re.test(name) && name.length <= 128 && !have_same){
             url = url + after_name;
-            fetch(url,{credentials: "same-origin", method: "PATCH"}).then(function(response){
+            fetch(url,{credentials: "same-origin", method: "PATCH"})
+            .then(function(response){
                 confirmButton.css("display","none");
                 if(response.ok){
                     modalPrompt.text("");
@@ -599,12 +615,12 @@ function renameEntryHandler(ev){
                     modalBody.html(success_message("已成功重命名"));
                 } else{
                     response.json().then(function(data){
-                        modalPrompt.html(error_message("重命名失败,未知错误.",data));
+                        modalPrompt.html(error_message("重命名失败.",data));
                     })
                 }
             })
         } else if(have_same) {
-            modalPrompt.html(error_message("重命名失败,当前目录内已有同名文件夹或文件夹."));
+            modalPrompt.html(error_message("重命名失败,当前目录内已有同名文件或文件夹."));
         } else {
             modalPrompt.html(error_message("重命名失败,名称不符合规范."))
         }
@@ -633,7 +649,8 @@ function deleteEntryHandler(ev){
 
     var confirmButton = modalFooter.find('.btn-primary');
     confirmButton.off().one("click",function(){
-        fetch(url,{credentials: "same-origin", method: "DELETE"}).then(function(response){
+        fetch(url,{credentials: "same-origin", method: "DELETE"})
+        .then(function(response){
             confirmButton.css("display","none");
             if (response.ok) {
                 $("#"+ev.data.id).css("display","none");
@@ -650,20 +667,103 @@ function deleteEntryHandler(ev){
     modal.modal('show');
 }
 function createFileHandler(ev){
-    alert("still develop");
     hideBlankMenu(ev,true);
+    var url = PARADICT["file_api_url"] + PARADICT["username"] + CURRENTPATH +'?create_file=1&name=';
+    var modal = $(".confirm_modal");
+    var modalTitle = modal.find(".modal-title");
+    var modalPrompt = modal.find(".modal-prompt");
+    var modalBody = modal.find(".modal-body");
+    var modalFooter = modal.find(".modal-footer");
+    var re = /^[\w\u4e00-\u9fa5!@#$%,\+\-\^]{1}([ ]?[\w\u4e00-\u9fa5!@#$%,.\+\-\^])*[ ]?[\w\u4e00-\u9fa5!@#$%,\+\-\^]{1}$/;
+    // add content
+    modalTitle.text("创建新文件");
+    modalPrompt.text("");
+    modalBody.html('<label for="name_input">请为其输入名称:</label><input type="text" id="name_input" size=40>');
+    modalFooter.html('<button type="button" class="btn btn-primary">确认</button><button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>');
+    var confirmButton = modalFooter.find('.btn-primary');
+    confirmButton.off().on("click",function(){
+        name = document.querySelector("#name_input").value;
+        var have_same = have_same_file(name,JSONDATA);
+        if(re.test(name) && name.length <= 128 && !have_same){
+            url = url + name;
+            fetch(url,{credentials: "same-origin", method: "POST"})
+            .then(function(response){
+                confirmButton.css("display","none");
+                if(response.ok){
+                    draw_all('/');
+                    modalTitle.text("创建文件成功");
+                    modalPrompt.text("");
+                    modalBody.html(success_message("已成功创建文件"));
+                } else{
+                    response.json().then(function(data){
+                        modalPrompt.html(error_message("创建失败.",data));
+                    })
+                }
+            })
+        } else if(have_same) {
+            modalPrompt.html(error_message("创建失败,当前目录内已有同名文件或文件夹."));
+        } else {
+            modalPrompt.html(error_message("创建失败,名称不符合规范."))
+        }
+    })
+    modal.modal('show');
 }
 function createFolderHandler(ev){
-    alert("still develop");
     hideBlankMenu(ev,true);
+    var url = PARADICT["file_api_url"] + PARADICT["username"] + CURRENTPATH +'?create_folder=1&name=';
+    var modal = $(".confirm_modal");
+    var modalTitle = modal.find(".modal-title");
+    var modalPrompt = modal.find(".modal-prompt");
+    var modalBody = modal.find(".modal-body");
+    var modalFooter = modal.find(".modal-footer");
+    var re = /^[\w\u4e00-\u9fa5!@#$%,\+\-\^]{1}([ ]?[\w\u4e00-\u9fa5!@#$%,\+\-\^])*$/;
+    // add content
+    modalTitle.text("创建新文件夹");
+    modalPrompt.text("");
+    modalBody.html('<label for="name_input">请为其输入名称:</label><input type="text" id="name_input" size=40>');
+    modalFooter.html('<button type="button" class="btn btn-primary">确认</button><button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>');
+    var confirmButton = modalFooter.find('.btn-primary');
+    confirmButton.off().on("click",function(){
+        name = document.querySelector("#name_input").value;
+        var have_same = have_same_file(name,JSONDATA);
+        if(re.test(name) && name.length <= 128 && !have_same){
+            url = url + name;
+            fetch(url,{credentials: "same-origin", method: "POST"})
+            .then(function(response){
+                confirmButton.css("display","none");
+                if(response.ok){
+                    draw_all('/');
+                    modalTitle.text("创建文件夹成功");
+                    modalPrompt.text("");
+                    modalBody.html(success_message("已成功创建文件夹"));
+                } else{
+                    response.json().then(function(data){
+                        modalPrompt.html(error_message("创建失败.",data));
+                    })
+                }
+            })
+        } else if(have_same) {
+            modalPrompt.html(error_message("创建失败,当前目录内已有同名文件或文件夹."));
+        } else {
+            modalPrompt.html(error_message("创建失败,名称不符合规范."))
+        }
+    })
+    modal.modal('show');
 }
 function uploadFileHandler(ev){
-    alert("still develop");
     hideBlankMenu(ev,true);
+    $("#fileElem").click();
 }
-function uploadFolderHandler(ev){
-    alert("still develop");
-    hideBlankMenu(ev,true);
+function uploadFilesHandler(files){
+    var formData = new FormData();
+    var url = PARADICT["file_api_url"] + PARADICT["username"] + CURRENTPATH + "?upload_files=1"
+    for (var i = 0; i < files.length; i++){
+        formData.append('file', files[i])
+    }
+    fetch(url,{credentials: "same-origin", method: "POST", body: formData})
+    .then(function(response){
+      
+    })
 }
 function mouseMenuRightClickHandler(ev){
     ev.preventDefault();

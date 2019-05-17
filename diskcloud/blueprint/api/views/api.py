@@ -1,5 +1,6 @@
 from flask import request,views
 from diskcloud.models.valid import valid_url_path
+from diskcloud.models.response import gen_error_res
 
 class FileApi(views.MethodView):
     # route request method
@@ -12,9 +13,14 @@ class FileApi(views.MethodView):
             return self.FolderInfo(path)
         return self.Download(path)
     def post(self,path):
-        return 'POST'+path
-    def put(self,path):
-        return 'PUT'+path
+        if request.args.get('create_file') == '1':
+            return self.CreateFile(path)
+        if request.args.get('create_folder') == '1':
+            return self.CreateFolder(path)
+        if request.args.get('upload_files') == '1':
+            return self.UploadFiles(path)
+    # def put(self,path):
+    #     return 'PUT'+path
     def patch(self,path):
         if request.args.get('name') != None:
             return self.Rename(path)
@@ -58,7 +64,7 @@ class FileApi(views.MethodView):
 
     def GenerateId(self,url_path):
         from diskcloud.models.share import generate_id
-        from diskcloud.models.response import gen_error_res,gen_json_res
+        from diskcloud.models.response import gen_json_res
 
         result = valid_url_path(url_path)
         if isinstance(result,dict):
@@ -90,7 +96,6 @@ class FileApi(views.MethodView):
 
     def Move(self,url_path):
         from diskcloud.models.file import moveto
-        from diskcloud.models.response import gen_error_res
 
         af_path = request.json.get("af_path",None)
         if af_path is None:
@@ -111,4 +116,43 @@ class FileApi(views.MethodView):
         result = valid_url_path(url_path)
         if isinstance(result,dict):
             return delete(result['url_path'],result['is_file'])
+        return result
+
+    def CreateFile(self,url_path):
+        from diskcloud.models.file import create_file
+
+        result = valid_url_path(url_path, True)
+        if isinstance(result,dict):
+            if result['is_file'] == False:
+                return create_file(url_path, request.args.get('name'))
+            return gen_error_res("path must be a dir",400)
+        return result
+
+    def CreateFolder(self,url_path):
+        from diskcloud.models.file import create_folder
+
+        result = valid_url_path(url_path, True)
+        if isinstance(result,dict):
+            if result['is_file'] == False:
+                return create_folder(url_path, request.args.get('name'))
+            return gen_error_res("path must be a dir",400)
+        return result
+
+    def UploadFiles(self,url_path):
+        from diskcloud.models.file import save_file
+
+        result = valid_url_path(url_path, True)
+        if isinstance(result,dict):
+            if result['is_file'] == False:
+                if 'file' not in request.files:
+                    return gen_error_res("no file part")
+                files = request.files
+                if len(files) == 0:
+                    return gen_error_res("no selected file")
+                for i in files:
+                    result = save_file(url_path, files[i])
+                    if result != True:
+                        return result
+                return ('',200)
+            return gen_error_res("path must be a dir",400)
         return result

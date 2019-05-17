@@ -1,15 +1,17 @@
-def download(path_str,is_file=None):
+def download(path,is_file=None):
     from flask import current_app,make_response
     from pathlib import Path
     from tarfile import open
-    # from urllib.parse import quote
+    from urllib.parse import quote
     from diskcloud.models.response import gen_error_res
 
-    if isinstance(path_str,Path):
-        file_path = path_str
-        path_str = file_path.relative_to(current_app.config['FILES_FOLDER']).as_posix()
+    if isinstance(path,Path):
+        file_path = path
+        sub_path = file_path.relative_to(current_app.config['FILES_FOLDER']).as_posix()
     else:
-        file_path = Path(current_app.config['FILES_FOLDER'],path_str)
+        file_path = Path(current_app.config['FILES_FOLDER'],path)
+        sub_path = path
+
     if is_file is None:
         if file_path.exists():
             if file_path.is_file():
@@ -20,19 +22,11 @@ def download(path_str,is_file=None):
             return gen_error_res('invalid path,path is not file or dir.',404)
 
     if is_file is True:
-        whole_path = file_path.resolve().as_posix()
-        response = make_response('')
-        response.headers['X-Accel-Redirect'] = whole_path
-        return response
-        # arr = file_path.resolve().as_posix().rsplit('/',maxsplit=1)
-        # dirpath = arr[0]
-        # filename = arr[1]
-        # response = send_from_directory(dirpath,filename)
-        # filename_escape = quote(filename)
-        # response.headers['Content-Disposition'] = "attachment;filename=" + filename_escape + ";filename*=UTF-8''" + filename_escape
-        # return response
+        content_length = get_size(file_path)
+        content_mime = get_mime(file_path)
     else:
-        tar_path = Path(current_app.config['COMPRESS_FOLDER'], path_str + '.tar')
+        sub_path = Path(current_app.config['COMPRESS_FOLDER'], sub_path + '.tar').as_posix()
+        tar_path = Path(current_app.config['FILES_FOLDER'], sub_path)
         tar_path_str = tar_path.resolve().as_posix()
         Path(tar_path.parent).mkdir(parents=True,exist_ok=True)
         try:
@@ -40,17 +34,17 @@ def download(path_str,is_file=None):
                 tar.add(file_path,arcname=file_path.name)
         except FileExistsError:
             pass
-        whole_path = tar_path_str
-        response = make_response('')
-        response.headers['X-Accel-Redirect'] = whole_path
-        return response
-        # arr = tar_path_str.rsplit('/',maxsplit=1)
-        # dirpath = arr[0]
-        # filename = arr[1]
-        # response = send_from_directory(dirpath,filename)
-        # filename_escape = quote(filename)
-        # response.headers['Content-Disposition'] = "attachment;filename=" + filename_escape + ";filename*=UTF-8''" + filename_escape
-        # return response
+        content_length = get_size(tar_path)
+        content_mime = "application/x-tar"
+
+    response = make_response('')
+    filename = sub_path.rsplit('/',maxsplit=1)[1]
+    filename_escape = quote(filename)
+    response.headers['X-Accel-Redirect'] = current_app.config['NGINX_X_ACCEL_REDIRECT'] + sub_path
+    response.headers['Content-Disposition'] = "attachment;filename=" + filename_escape + ";filename*=UTF-8''" + filename_escape
+    response.headers['Content-Length'] = content_length
+    response.headers['Content-Type'] = content_mime
+    return response
 
 def get_info(path_str):
     from pathlib import Path
@@ -124,8 +118,8 @@ def rename(path_str,name,is_file):
                 before_path.rename(after_path)
                 return ('',200)
     except:
-        return gen_error_res('fail to rename',500)
-    return gen_error_res('invalid name',400)
+        return gen_error_res('fail to rename', 500)
+    return gen_error_res('invalid name', 400)
 
 def delete(path_str,is_file):
     from pathlib import Path
@@ -142,7 +136,53 @@ def delete(path_str,is_file):
             rmtree(file_path)
         return ('',200)
     except:
-        gen_error_res('fail to delete',500)
+        return gen_error_res('fail to delete',500)
+
+def create_file(path_str,name):
+    from pathlib import Path
+    from flask import current_app
+    from diskcloud.models.response import gen_error_res
+    from diskcloud.models.valid import valid_file_name
+
+    if valid_file_name(name):
+        file_path = Path(current_app.config['FILES_FOLDER'],path_str,name).as_posix()
+        try:
+            file = open(file_path,'a+')
+            file.close()
+            return ('',200)
+        except:
+            return gen_error_res('fail to create file', 500)
+    return gen_error_res('invalid file name', 400)
+
+def create_folder(path_str, name):
+    from pathlib import Path
+    from flask import current_app
+    from diskcloud.models.response import gen_error_res
+    from diskcloud.models.valid import valid_dir_name
+    from os import mkdir
+
+    if valid_dir_name(name):
+        folder_path = Path(current_app.config['FILES_FOLDER'],path_str,name).as_posix()
+        try:
+            mkdir(folder_path)
+            return ('',200)
+        except:
+            return gen_error_res('fail to create folder', 500)
+    return gen_error_res('invalid folder name', 400)
+
+def save_file(path_str, file):
+    from pathlib import Path
+    from flask import current_app
+    from diskcloud.models.valid import valid_file_name
+    from diskcloud.models.response import gen_error_res
+
+    if valid_file_name(file.filename):
+        try:
+            file.save(Path(current_app.config['FILES_FOLDER'],path_str,file.filename).as_posix())
+            return True
+        except:
+            return gen_error_res('fail to save uploaded file', 500)
+    return gen_error_res('invalid file name', 400)
 
 def get_mtime(path):
     import time
@@ -153,3 +193,8 @@ def get_mtime(path):
 
 def get_size(path):
     return path.stat().st_size
+
+def get_mime(path):
+    from .mime import MIME
+    suffix = path.suffix
+    return MIME.get(suffix)

@@ -26,12 +26,12 @@ def valid_user(username,pw_hashed):
     return False
 
 def valid_file_name(name):
-    if len(name) <= 64:
+    if len(name) <= 128:
         return re_match('^[\w!@#$%,\+\-\^]{1}([ ]?[\w!@#$%,.\+\-\^])*[ ]?[\w!@#$%,\+\-\^]{1}$',name)
     return False
 
 def valid_dir_name(name):
-    if len(name) <= 64:
+    if len(name) <= 128:
         return re_match('^[\w!@#$%,\+\-\^]{1}([ ]?[\w!@#$%,\+\-\^])*$',name)
     return False
 

@@ -1,4 +1,4 @@
-def create_app(conf=None):
+def create_app(debug=False):
     from flask import Flask
 
     app = Flask(__name__)
@@ -8,10 +8,10 @@ def create_app(conf=None):
     #     pass
 
     #import config from file
-    app.config.from_pyfile('config/config.py',silent=True)
-
-    if conf is not None:
-        app.config.from_pyfile(conf,silent=True)
+    if debug is True:
+        app.config.from_pyfile('config/debug_config.py',silent=True)
+    else:
+        app.config.from_pyfile('config/config.py',silent=True)
 
     # add blueprint
     from .blueprint.api.bp import api_bp
