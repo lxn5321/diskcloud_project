@@ -24,6 +24,7 @@ function init_all(){
         $('#name_input').focus();
     })
 
+    $(".blank_menu_refresh").on("click", refreshHandler);
     $(".blank_menu_create_file").on("click", createFileHandler);
     $(".blank_menu_create_folder").on("click", createFolderHandler);
     $(".blank_menu_upload_file").on("click", uploadFileHandler);
@@ -40,9 +41,8 @@ function draw_all(path){
 function resize(){
     W = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
     H = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
-    $(".entry-container").css({
-        height: H - 41
-    })
+    let height = H - parseFloat($(".top-container").css("height"), 10);
+    $(".entry-container").css("height", height);
 }
 function get_info_json(path,exec_func=null){
     fetch(PARADICT["file_api_url"] + PARADICT["username"] + path + '?info=1', {credentials: "same-origin"})
@@ -192,7 +192,7 @@ function createBreadCrumb(addedDirName = "") {
         if(breadCrumbElements){
             breadCrumbElements.remove();
         }
-        var rootPath = $("<span class='bc_path' id='bc_path0'></span>").text("Root").one("click",breadCrumbClickHandler);;
+        var rootPath = $("<span class='bc_path' id='bc_path0'></span>").text("根目录").one("click",breadCrumbClickHandler);;
         cacheArray.push(rootPath);
         if(CURRENTPATH != "/"){
             var pathArray = CURRENTPATH.slice(1, CURRENTPATH.length - 1).split("/");
@@ -690,7 +690,7 @@ function createFileHandler(ev){
             .then(function(response){
                 confirmButton.css("display","none");
                 if(response.ok){
-                    draw_all('/');
+                    draw_all(CURRENTPATH);
                     modalTitle.text("创建文件成功");
                     modalPrompt.text("");
                     modalBody.html(success_message("已成功创建文件"));
@@ -732,7 +732,7 @@ function createFolderHandler(ev){
             .then(function(response){
                 confirmButton.css("display","none");
                 if(response.ok){
-                    draw_all('/');
+                    draw_all(CURRENTPATH);
                     modalTitle.text("创建文件夹成功");
                     modalPrompt.text("");
                     modalBody.html(success_message("已成功创建文件夹"));
@@ -789,7 +789,7 @@ function uploadFilesHandler(files){
         if(response.ok){
           modalTitle.text("上传成功");
           modalBody.html(success_message("已成功上传文件"));
-          draw_all('/');
+          draw_all(CURRENTPATH);
         }else {
           response.json().then(function(data){
             modalTitle.text("上传失败");
@@ -798,9 +798,13 @@ function uploadFilesHandler(files){
         }
       })
     }
-    
+
     $("#fileElem").val('');
     modal.modal('show');
+}
+function refreshHandler(ev){
+    draw_all(CURRENTPATH);
+    hideBlankMenu(ev,true);
 }
 function mouseMenuRightClickHandler(ev){
     ev.preventDefault();
