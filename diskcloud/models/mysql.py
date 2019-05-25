@@ -12,27 +12,34 @@ def _get_db():
 def _get_cursor():
     return _get_db().cursor()
 
-def select_execute(statement,tuple):
+def select_execute(statement, tuple):
     c = _get_cursor()
-    value = c.execute(statement,tuple)
-    result = False
-    if value == 1:
-        result = c.fetchone()
+    value = c.execute(statement, tuple)
+    result = c.fetchall()
     c.close()
     return result
 
-def update_execute(statement,tuple):
+def update_execute(statement, tuple):
     db = _get_db()
     c = db.cursor()
-    value = c.execute(statement,tuple)
+    value = c.execute(statement, tuple)
     if value == 1:
-        db.commit()
         result = True
     else:
-        db.rollback()
         result = False
     c.close()
     return result
 
-def insert_execute(statement,tuple):
-    return update_execute(statement,tuple)
+def insert_execute(statement, tuple):
+    return update_execute(statement, tuple)
+
+def delete_execute(statement, tuple):
+    return update_execute(statement, tuple)
+
+def db_commit():
+    db = _get_db()
+    db.commit()
+
+def db_rollback():
+    db = _get_db()
+    db.rollback()

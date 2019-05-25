@@ -41,8 +41,8 @@ function draw_all(path){
 function resize(){
     W = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
     H = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
-    let height = H - parseFloat($(".top-container").css("height"), 10);
-    $(".entry-container").css("height", height);
+    let height = H - 53;
+    $(".right-container").css("height", height);
 }
 function get_info_json(path,exec_func=null){
     fetch(PARADICT["file_api_url"] + PARADICT["username"] + path + '?info=1', {credentials: "same-origin"})
@@ -78,17 +78,17 @@ function have_same_file(name,jsondata = JSONDATA){
     return have_same;
 }
 function success_message(mes){
-    return '<div class="container"><div class="media"><div class="success_icon"></div><div id="success_hint"class="text-success media-body">' + mes + '</div></div>'
+    return '<div class="container"><div class="media"><div class="success_icon"></div><div id="success_hint"class="text-success media-body">' + mes + '</div></div></div>'
 }
 function error_message(mes,jsondata=null){
     if(jsondata === null){
-        return '<div class="media"><div class="error_icon"></div><div class="fail_hint text-danger">' + mes + '</div></div>';
+        return '<div class="container"><div class="media"><div class="error_icon"></div><div class="fail_hint text-danger media-body">' + mes + '</div></div></div>';
     }
-    return '<div class="media"><div class="error_icon"></div><div class="fail_hint text-danger">' + mes + '\n' + jsondata.err_mes + '</div></div>';
+    return '<div class="container"><div class="media"><div class="error_icon"></div><div class="fail_hint text-danger media-body">' + mes + '\n' + jsondata.err_mes + '</div></div></div>';
 }
 function createDirTable(path = CURRENTPATH, data = JSONDATA) {
     var entryContainer = $(".entry-container");
-    var entryRow = entryContainer.find(".entry_row");
+    var entryRow = entryContainer.find(".entry-row");
     var cacheArray = new Array();
     // var pathLength = path.length
     // // If path != "/" and path ends with a slash, remove the slash
@@ -101,13 +101,13 @@ function createDirTable(path = CURRENTPATH, data = JSONDATA) {
     }
     // create folder row
     for (var n = 0; n < data.directories.length; n++) {
-        var folderRow = $("<div class='row folder_row entry_row' id='folder_row" + (n + 1) + "'></div>");
+        var folderRow = $("<div class='folder-row entry-row' id='folder_row" + (n + 1) + "'></div>");
         var nameCol = $("<div class='col-7 media'></div>");
         var iconContainer = $("<div class='icon_container d-flex align-items-center justify-content-center'></div>");
         var icon = $("<div class='folder_icon'></div>");
         var mediaBody = $("<div class='media-body'></div>").text(data.directories[n][0]);
         var sizeCol = $("<div class='col-2 d-flex align-items-center'></div>");
-        var mtimeCol = $("<div class='col-3 d-flex align-items-center'></div>").text('20'+data.directories[n][1]);
+        var mtimeCol = $("<div class='col-3 d-flex align-items-center'></div>").text(strptime(data.directories[n][1]));
         iconContainer.append(icon);
         nameCol.append(iconContainer,mediaBody);
         folderRow.append(nameCol,sizeCol,mtimeCol);
@@ -116,13 +116,13 @@ function createDirTable(path = CURRENTPATH, data = JSONDATA) {
     // create file row
     for (var n = 0; n < data.files.length; n++) {
         var fileName = data.files[n][0];
-        var fileRow = $("<div class='row file_row entry_row' id='file_row" + (n + 1) + "'></div>");
+        var fileRow = $("<div class='file-row entry-row' id='file_row" + (n + 1) + "'></div>");
         var nameCol = $("<div class='col-7 media'></div>");
         var iconContainer = $("<div class='icon_container d-flex align-items-center justify-content-center'></div>");
         var icon = $("<div></div>");
         var mediaBody = $("<div class='media-body'></div>").text(fileName);
         var sizeCol = $("<div class='col-2 d-flex align-items-center'></div>").text(toStandardSize(data.files[n][2]));
-        var mtimeCol = $("<div class='col-3 d-flex align-items-center'></div>").text('20'+data.files[n][1]);
+        var mtimeCol = $("<div class='col-3 d-flex align-items-center'></div>").text(strptime(data.files[n][1]));
         // add icon by file name suffix
         var index = fileName.lastIndexOf(".");
         var suffix = fileName.slice(index + 1).toLowerCase();
@@ -168,21 +168,21 @@ function createDirTable(path = CURRENTPATH, data = JSONDATA) {
       click: wholeContainerClickHandler,
       contextmenu: wholeContainerRightClickHandler
     })
-    entryContainer.find(".folder_row").on({
+    entryContainer.find(".folder-row").on({
       dblclick: folderRowDblClickHandler
     });
-    entryContainer.find(".entry_row").on({
+    entryContainer.find(".entry-row").on({
       click: wholeContainerClickHandler,
       contextmenu: wholeContainerRightClickHandler
     });
 }
 function createBreadCrumb(addedDirName = "") {
-    var breadCrumbRow = $(".breadcrumb_row")
+    var breadCrumbRow = $(".breadcrumb-row")
     var col = breadCrumbRow.find(".col-12");
     //only append
     if(addedDirName != ""){
-        var separator = $("<span class='bc_separator'></span>").text(SEPARATORSYMBOL);
-        var pathSpan = $("<span class='bc_path' id='bc_path" + ++_PATHID + "'></span>").text(addedDirName).one("click",breadCrumbClickHandler);
+        var separator = $("<span class='bc-separator'></span>").text(SEPARATORSYMBOL);
+        var pathSpan = $("<span class='bc-path' id='bc_path" + ++_PATHID + "'></span>").text(addedDirName).one("click",breadCrumbClickHandler);
         col.append(separator,pathSpan);
     }
     //rewriting
@@ -192,13 +192,13 @@ function createBreadCrumb(addedDirName = "") {
         if(breadCrumbElements){
             breadCrumbElements.remove();
         }
-        var rootPath = $("<span class='bc_path' id='bc_path0'></span>").text("根目录").one("click",breadCrumbClickHandler);;
+        var rootPath = $("<span class='bc-path' id='bc_path0'></span>").text("根目录").one("click",breadCrumbClickHandler);;
         cacheArray.push(rootPath);
         if(CURRENTPATH != "/"){
             var pathArray = CURRENTPATH.slice(1, CURRENTPATH.length - 1).split("/");
             for (var i = 0; i < pathArray.length; i++) {
-                var separator = $("<span class='bc_separator'></span>").text(SEPARATORSYMBOL);
-                var pathSpan = $("<span class='bc_path' id='bc_path" + (i + 1) + "'></span>").text(pathArray[i]);
+                var separator = $("<span class='bc-separator'></span>").text(SEPARATORSYMBOL);
+                var pathSpan = $("<span class='bc-path' id='bc_path" + (i + 1) + "'></span>").text(pathArray[i]);
                 if(i != pathArray.length - 1){
                     pathSpan.one("click",breadCrumbClickHandler);
                 }
@@ -260,10 +260,14 @@ function unselected(element){
 }
 function showEntryMenu(ev){
     ev.preventDefault();
-    var entryId = ev.currentTarget.id;
-    // if it is file_row,don't display open function
-    var entryMenuOpen = $(".entry_menu_open");
-    if(entryId.includes("file_row")){
+    let entryId = ev.currentTarget.id;
+    let isFileRow = entryId.includes("file_row");
+    let height = 225.5;
+    let width = 84
+    // if it is file-row,don't display open function
+    let entryMenuOpen = $(".entry_menu_open");
+    if(isFileRow){
+        height = 195;
         if(entryMenuOpen.css("display") != "none"){
             entryMenuOpen.css("display","none");
         }
@@ -277,36 +281,36 @@ function showEntryMenu(ev){
     // bind eventHandler to other entryMenuElement
     $(".entry_menu_download").off().one("click",{id: entryId},downloadEntryHandler);
     $(".entry_menu_share").off().one("click",{id: entryId},shareEntryHandler);
+    $(".entry_menu_star").off().one("click",{id: entryId},starEntryHandler);
     $(".entry_menu_delete").off().one("click",{id: entryId},deleteEntryHandler);
     $(".entry_menu_move").off().one("click",{id: entryId},moveEntryHandler);
     $(".entry_menu_rename").off().one("click",{id: entryId},renameEntryHandler);
     // display entry menu
-    if(H - ev.pageY < 195){
-        $(".entry_menu").css("top",ev.pageY - 195);
+    if(H - ev.pageY < height){
+        $(".entry_menu").css("top",ev.pageY - height);
     } else{
         $(".entry_menu").css("top",ev.pageY);
     }
-    if(W - ev.pageX < 84){
-        $(".blank_menu").css("left",ev.pageX - 84);
+    if(W - ev.pageX < width){
+        $(".entry_menu").css("left",ev.pageX - width);
     } else{
-        $(".blank_menu").css("left",ev.pageX);
+        $(".entry_menu").css("left",ev.pageX);
     }
 
     $(".entry_menu").css({
-        "left": ev.pageX,
         "display": "flex"
     });
 }
 function showBlankMenu(ev){
     ev.preventDefault();
 
-    if(H - ev.pageY < 134){
-        $(".blank_menu").css("top",ev.pageY - 134);
+    if(H - ev.pageY < 134.3){
+        $(".blank_menu").css("top",ev.pageY - 134.3);
     } else{
         $(".blank_menu").css("top",ev.pageY);
     }
-    if(W - ev.pageX < 105){
-        $(".blank_menu").css("left",ev.pageX - 105);
+    if(W - ev.pageX < 105.5){
+        $(".blank_menu").css("left",ev.pageX - 105.5);
     } else{
         $(".blank_menu").css("left",ev.pageX);
     }
@@ -369,7 +373,7 @@ function downloadEntryHandler(ev){
     var name = document.querySelector("#"+ev.data.id+" .media-body").innerHTML;
     var url = PARADICT["file_api_url"] + PARADICT["username"] + CURRENTPATH + name + '/';
     var modal = $(".confirm_modal");
-    if(ev.data.id.includes("file_row")){
+    if(ev.data.id.includes("file-row")){
         var content = "确认下载该文件吗？";
     } else {
         var content = "确认下载该文件夹吗？";
@@ -425,7 +429,8 @@ function shareEntryHandler(ev){
                 })
             } else {
                 response.json().then(function(data) {
-                    modalPrompt.html(error_message("链接创建错误",data));
+                    modalTitle.text("发生了一个错误");
+                    modalBody.html(error_message("链接创建错误",data));
                 })
             }
         })
@@ -556,7 +561,8 @@ function moveEntryHandler(ev){
                                                 modalBody.html(success_message("已成功移动"));
                                             }else{
                                                 response.json().then(function(data){
-                                                    modalPrompt.html(error_message("服务器错误,移动失败",data));
+                                                    modalTitle.text("发生了一个错误");
+                                                    modalBody.html(error_message("移动失败",data));
                                                 });
                                             }
                                         });
@@ -564,7 +570,8 @@ function moveEntryHandler(ev){
                                 })
                             } else {
                                 response.json().then(function(data){
-                                    modalPrompt.html(error_message("获取所选文件夹列表失败",data));
+                                    modalTitle.text("发生了一个错误");
+                                    modalBody.html(error_message("获取所选文件夹列表失败",data));
                                 })
                             }
                         });
@@ -573,7 +580,8 @@ function moveEntryHandler(ev){
             })
         } else {
             confirmButton.css("display","none");
-            modalPrompt(error_message("获取文件夹列表失败",data));
+            modalTitle.text("发生了一个错误");
+            modalBody.html(error_message("获取文件夹列表失败",data));
         }
     })
     confirmButton.css("display","block");
@@ -583,7 +591,7 @@ function renameEntryHandler(ev){
     hideEntryMenu(ev,true);
     var namefield = document.querySelector("#"+ev.data.id+" .media-body");
     name = namefield.innerHTML
-    var url = PARADICT["file_api_url"] + PARADICT["username"] + CURRENTPATH + name + '/?name=';
+    var url = PARADICT["file_api_url"] + PARADICT["username"] + CURRENTPATH + name + '/?af_name=';
     var modal = $(".confirm_modal");
     var modalTitle = modal.find(".modal-title");
     var modalPrompt = modal.find(".modal-prompt");
@@ -597,13 +605,13 @@ function renameEntryHandler(ev){
     var confirmButton = modalFooter.find('.btn-primary');
     confirmButton.off().on("click",function(){
         after_name = document.querySelector("#name_input").value;
-        if(ev.data.id.includes("file_row")){
+        if(ev.data.id.includes("file-row")){
             var re = /^[\w\u4e00-\u9fa5!@#$%,\+\-\^]{1}([ ]?[\w\u4e00-\u9fa5!@#$%,.\+\-\^])*[ ]?[\w\u4e00-\u9fa5!@#$%,\+\-\^]{1}$/;
         }else{
             var re = /^[\w\u4e00-\u9fa5!@#$%,\+\-\^]{1}([ ]?[\w\u4e00-\u9fa5!@#$%,\+\-\^])*$/;
         }
         var have_same = have_same_file(after_name,JSONDATA);
-        if(re.test(name) && name.length <= 128 && !have_same){
+        if(re.test(name) && name.length <= 255 && !have_same){
             url = url + after_name;
             fetch(url,{credentials: "same-origin", method: "PATCH"})
             .then(function(response){
@@ -615,7 +623,8 @@ function renameEntryHandler(ev){
                     modalBody.html(success_message("已成功重命名"));
                 } else{
                     response.json().then(function(data){
-                        modalPrompt.html(error_message("重命名失败.",data));
+                        modalTitle.text("发生了一个错误");
+                        modalBody.html(error_message("重命名失败.",data));
                     })
                 }
             })
@@ -627,12 +636,15 @@ function renameEntryHandler(ev){
     })
     modal.modal('show');
 }
+function starEntryHandler(ev){
+  pass
+}
 function deleteEntryHandler(ev){
     hideEntryMenu(ev,true);
     var name = document.querySelector("#"+ev.data.id+" .media-body").innerHTML;
     var url = PARADICT["file_api_url"] + PARADICT["username"] + CURRENTPATH + name + '/';
     var modal = $(".confirm_modal");
-    if(ev.data.id.includes("file_row")){
+    if(ev.data.id.includes("file-row")){
         var format = "文件"
     } else {
         var format = "文件夹"
@@ -659,7 +671,8 @@ function deleteEntryHandler(ev){
                 modalBody.html(success_message("已成功删除"));
             } else {
                 response.json().then(function(data) {
-                    modalPrompt.html(error_message("删除失败",data))
+                    modalTitle.text("发生了一个错误");
+                    modalBody.html(error_message("删除失败",data))
                 })
             }
         })
@@ -684,7 +697,7 @@ function createFileHandler(ev){
     confirmButton.off().on("click",function(){
         name = document.querySelector("#name_input").value;
         var have_same = have_same_file(name,JSONDATA);
-        if(re.test(name) && name.length <= 128 && !have_same){
+        if(re.test(name) && name.length <= 255 && !have_same){
             url = url + name;
             fetch(url,{credentials: "same-origin", method: "POST"})
             .then(function(response){
@@ -696,7 +709,8 @@ function createFileHandler(ev){
                     modalBody.html(success_message("已成功创建文件"));
                 } else{
                     response.json().then(function(data){
-                        modalPrompt.html(error_message("创建失败.",data));
+                        modalTitle.text("发生了一个错误");
+                        modalBody.html(error_message("创建失败.",data));
                     })
                 }
             })
@@ -726,7 +740,7 @@ function createFolderHandler(ev){
     confirmButton.off().on("click",function(){
         name = document.querySelector("#name_input").value;
         var have_same = have_same_file(name,JSONDATA);
-        if(re.test(name) && name.length <= 128 && !have_same){
+        if(re.test(name) && name.length <= 255 && !have_same){
             url = url + name;
             fetch(url,{credentials: "same-origin", method: "POST"})
             .then(function(response){
@@ -738,7 +752,8 @@ function createFolderHandler(ev){
                     modalBody.html(success_message("已成功创建文件夹"));
                 } else{
                     response.json().then(function(data){
-                        modalPrompt.html(error_message("创建失败.",data));
+                        modalTitle.text("发生了一个错误");
+                        modalBody.html(error_message("创建失败.",data));
                     })
                 }
             })
@@ -775,7 +790,7 @@ function uploadFilesHandler(files){
           modalBody.html(error_message("当前目录内有与上传文件相同名称的文件或者文件夹."));
           break;
         }
-        if(!re.test(files[i].name) || files[i].name.length > 128){
+        if(!re.test(files[i].name) || files[i].name.length > 255){
           valid = false;
           modalTitle.text("上传失败");
           modalBody.html(error_message("上传文件名称不合法."));
@@ -809,4 +824,15 @@ function refreshHandler(ev){
 function mouseMenuRightClickHandler(ev){
     ev.preventDefault();
     ev.stopPropagation();
+}
+function strptime(time_str){
+  let year = '20' + time_str.slice(0, 2);
+  let month = time_str.slice(2, 4);
+  let day = time_str.slice(4, 6);
+  let hour = time_str.slice(6, 8);
+  let minute = time_str.slice(8, 10);
+  let second = time_str.slice(10, 12);
+  let time = year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second
+
+  return time;
 }

@@ -1,15 +1,14 @@
 def Share(sid):
     from pathlib import Path
-    from flask import render_template,current_app
+    from flask import render_template
     from diskcloud.models.share import valid_sid
     from diskcloud.models.file import download
 
     result = valid_sid(sid)
     if result == False:
         return render_template('error.html',err_mes = 'valid sid')
-    path = Path(current_app.config['FILES_FOLDER'],result)
+    path = Path(result[0], result[1], result[2]).as_posix()
     try:
-        result = download(path)
-        return result
+        return download(path)
     except ValueError as e:
         return render_template('error.html',err_mes = e)
