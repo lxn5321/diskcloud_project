@@ -16,3 +16,6 @@ def hash_sha3(password):
 
     pw_hashed = hashlib.sha3_256(password.encode('utf-8')).hexdigest()
     return pw_hashed
+
+def name_parse(name):
+    return name.replace('*', '%')
