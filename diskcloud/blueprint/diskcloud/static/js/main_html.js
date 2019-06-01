@@ -1041,8 +1041,8 @@ function moveEntry() {
                           .then(function(response) {
                             confirmButton.css("display", "none");
                             if (response.ok) {
+                              draw_all();
                               modalPrompt.text("");
-                              selectedElement.style.display = 'none';
                               modalBody.html(success_message("已成功移动"));
                             } else {
                               response.json().then(function(data) {
@@ -1117,7 +1117,7 @@ function renameEntry() {
         .then(function(response) {
           confirmButton.css("display", "none");
           if (response.ok) {
-            selected.querySelector('.content').innerText = after_name;
+            draw_all();
             modalPrompt.text("");
             modalTitle.text("重命名成功");
             modalBody.html(success_message("已成功重命名"));
@@ -1258,7 +1258,7 @@ function removeEntry() {
       .then(function(response) {
         confirmButton.css("display", "none");
         if (response.ok) {
-          entry.style.display = 'none';
+          draw_all()
           modalPrompt.text("");
           modalTitle.text("放入回收站成功");
           modalBody.html(success_message("已成功放入回收站"));
