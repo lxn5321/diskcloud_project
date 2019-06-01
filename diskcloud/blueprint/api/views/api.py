@@ -30,8 +30,6 @@ class FileApi(views.MethodView):
     # def put(self,path):
     #     return 'PUT'+path
     def patch(self,path):
-        if request.args.get('af_name', None) is not None:
-            return self.Rename(path)
         if request.args.get('star') == '1':
             return self.Star(path)
         if request.args.get('star') == '0':
@@ -44,7 +42,11 @@ class FileApi(views.MethodView):
             return self.Trashcan(path)
         if request.args.get('trash_can') == '0':
             return self.Untrashcan(path)
-        return self.Move(path)
+        if request.json:
+            if request.json.get('af_name', None):
+                return self.Rename(path)
+            if request.json.get("af_path", None):
+                return self.Move(path)
     def delete(self,path):
         return self.Delete(path)
     # Main Processer
@@ -118,13 +120,13 @@ class FileApi(views.MethodView):
         from diskcloud.models.file import get_search_info
         from diskcloud.models.response import gen_json_res
 
-        search_name = request.args.get('name', None)
-        if search_name is None:
+        search_text = request.args.get('search_text', None)
+        if search_text is None:
             return gen_error_res("invalid request args",400)
         result = valid_url_path(path, True)
         if isinstance(result, dict):
             if result['path'] == '.' and result['name'] == '.':
-                json_obj = get_search_info(result['username'], search_name)
+                json_obj = get_search_info(result['username'], search_text)
                 return gen_json_res(json_obj)
             else:
                 return gen_error_res('invalid url', 400)
@@ -149,11 +151,9 @@ class FileApi(views.MethodView):
     def Move(self, path):
         from diskcloud.models.file import moveto
 
-        af_path = request.json.get("af_path", None)
-        if af_path is None:
-            return gen_error_res("request body error,invalid data",400)
         bf_result = valid_url_path(path)
         if isinstance(bf_result,dict):
+            af_path = request.json.get("af_path")
             af_result = valid_url_path(af_path,root_ok=True)
             if isinstance(af_result,dict):
                 if af_result['is_file'] is False:
@@ -214,9 +214,9 @@ class FileApi(views.MethodView):
                     return gen_error_res("no selected file")
                 for i in files:
                     if valid_file_name(files[i].filename):
-                        result = save_file(result['username'], result['path'],  result['name'], files[i])
-                        if result is not True:
-                            return result
+                        save_result = save_file(result['username'], result['path'],  result['name'], files[i])
+                        if save_result is not True:
+                            return save_result
                     else:
                         return gen_error_res('invalid file name', 400)
                 return ('', 200)
@@ -226,21 +226,18 @@ class FileApi(views.MethodView):
     def Rename(self,path):
         from diskcloud.models.file import rename
         from diskcloud.models.valid import valid_file_name,valid_dir_name
+        from diskcloud.models.response import gen_error_res
 
         result = valid_url_path(path)
         if isinstance(result,dict):
-            af_name = request.args.get('af_name', None)
-            if af_name is None:
-                return gen_error_res("invalid request args",400)
+            af_name = request.json.get('af_name')
             if result['is_file']:
-                result2 = valid_file_name(af_name)
+                if not valid_file_name(af_name):
+                    return gen_error_res('invalid file name', 400)
             else:
-                result2 = valid_dir_name(af_name)
-
-            if result2:
-                return rename(result['username'], result['path'], result['name'], af_name)
-            else:
-                return result2
+                if not valid_dir_name(af_name):
+                    return gen_error_res('invalid dir name', 400)
+            return rename(result['username'], result['path'], result['name'], af_name)
         return result
 
     def Share(self,path):
@@ -268,7 +265,6 @@ class FileApi(views.MethodView):
 
     def Unshare(self,path):
         from diskcloud.models.share import unshare
-        from diskcloud.models.valid import valid_file_name
 
         result = valid_url_path(path)
         if isinstance(result,dict):
@@ -277,7 +273,6 @@ class FileApi(views.MethodView):
 
     def Star(self, path):
         from diskcloud.models.file import star
-        from diskcloud.models.valid import valid_file_name
 
         result = valid_url_path(path)
         if isinstance(result,dict):
@@ -286,7 +281,6 @@ class FileApi(views.MethodView):
 
     def Unstar(self, path):
         from diskcloud.models.file import unstar
-        from diskcloud.models.valid import valid_file_name
 
         result = valid_url_path(path)
         if isinstance(result,dict):
@@ -295,18 +289,16 @@ class FileApi(views.MethodView):
 
     def Trashcan(self, path):
         from diskcloud.models.file import trash_can
-        from diskcloud.models.valid import valid_file_name
 
         result = valid_url_path(path)
         if isinstance(result,dict):
-            return trash_can(result['username'], result['path'],  result['name'])
+            return trash_can(result['username'], result['path'],  result['name'], result['is_file'])
         return result
 
     def Untrashcan(self, path):
         from diskcloud.models.file import untrash_can
-        from diskcloud.models.valid import valid_file_name
 
         result = valid_url_path(path)
         if isinstance(result,dict):
-            return untrash_can(result['username'], result['path'],  result['name'])
+            return untrash_can(result['username'], result['path'],  result['name'], result['is_file'])
         return result

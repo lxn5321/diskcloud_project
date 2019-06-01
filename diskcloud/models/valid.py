@@ -2,7 +2,7 @@
 def re_match(pattern,value):
     import re
 
-    match_obj = re.match(pattern,value)
+    match_obj = re.match(pattern, value)
     if match_obj == None:
         return False
     return True
@@ -26,16 +26,16 @@ def valid_user(username,pw_hashed):
     return False
 
 def valid_file_name(name):
-    if len(name) <= 128:
-        return re_match('^[\w!@#$%,\+\-\^]{1}([ ]?[\w!@#$%,.\+\-\^])*[ ]?[\w!@#$%,\+\-\^]{1}$',name)
+    if len(name) <= 255:
+        return re_match('^[\w!@#$%,\+\-\^\(\)]{1}([ ]?[\w!@#$%,.\+\-\^\(\)])*?[\w!@#$%,\+\-\^\(\)]{1}$',name)
     return False
 
 def valid_dir_name(name):
-    if len(name) <= 128:
-        return re_match('^[\w!@#$%,\+\-\^]{1}([ ]?[\w!@#$%,\+\-\^])*$',name)
+    if len(name) <= 255:
+        return re_match('^[\w!@#$%,\+\-\^\(\)]{1}([ ]?[\w!@#$%,\+\-\^\(\)])*$',name)
     return False
 
-def valid_url_path(url_path,root_ok=False):
+def valid_url_path(url_path, root_ok=False):
     from pathlib import Path
     from diskcloud.models.session import valid_session
     from diskcloud.models.response import gen_error_res

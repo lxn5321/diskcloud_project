@@ -70,16 +70,13 @@ def get_whole_folder_info(username):
     from pathlib import Path
 
     def walk(username, path):
-        dir_list = []
         dir_dict = {}
         result = select_execute('select name from storage where username = %s and path = %s and type = %s and trash_can = %s', (username, path, 1, 0))
         for i in range(len(result)):
-            dir_list.append(result[i][0])
-        if len(dir_list) != 0:
-            for i in dir_list:
-                dir_dict[i] = walk(username, Path(path, i).as_posix())
-            return dir_dict
-        return '0'
+            dir_dict[result[i][0]] = walk(username, Path(path, result[i][0]).as_posix())
+        if len(dir_dict) == 0:
+            return '0'
+        return dir_dict
 
     json_obj = walk(username, '.')
     return json_obj
@@ -117,18 +114,26 @@ def get_trash_can_info(username):
 
     dir_list = []
     file_list = []
-    result = select_execute('select type, name, trash_can_time, star, size from storage where username = %s and trash_can = %s', (username, 1))
+    result = select_execute('select type, name, trash_can_time, star, size, path from storage where username = %s and trash_can = %s', (username, 1))
     for i in range(len(result)):
-        if result[i][0] == 1:
-            dir_list.append([result[i][1], result[i][2], result[i][3]])
-        else:
-            file_list.append([result[i][1], result[i][2], result[i][3], result[i][4]])
+        is_internal = False
+        path = result[i][5]
+        if path != '.':
+            for n in range(len(result)):
+                if result[i][5].rsplit('/', maxsplit = 1)[-1] == result[n][1]:
+                    is_internal = True
+                    break
+        if not is_internal:
+            if result[i][0] == 1:
+                dir_list.append([result[i][1], result[i][2], result[i][3], result[i][5]])
+            else:
+                file_list.append([result[i][1], result[i][2], result[i][3], result[i][4], result[i][5]])
     json_obj = {'directories': dir_list, 'files': file_list}
     return json_obj
 
 def get_search_info(username, search_name):
     from diskcloud.models.mysql import select_execute
-    from diskcloud.odels.string import name_parse
+    from diskcloud.models.string import name_parse
 
     dir_list = []
     file_list = []
@@ -147,7 +152,7 @@ def rename(username, path, name, af_name):
     from diskcloud.models.response import gen_error_res
     from diskcloud.models.mysql import update_execute, db_commit, db_rollback
 
-    if update_execute('update storage set name = %s where username = %s and path = %s and name = %s', (af_name, username, path, name)):
+    if update_execute('update storage set name = %s where username = %s and path = %s and name = %s and trash_can = %s', (af_name, username, path, name, 0)):
         bf_path = Path(current_app.config['FILES_FOLDER'], 'user', username, path, name)
         af_path = Path(current_app.config['FILES_FOLDER'], 'user', username, path, af_name)
         try:
@@ -167,7 +172,7 @@ def moveto(username, bf_path, bf_name, af_path, af_name):
 
     path = Path(af_path, af_name).as_posix()
 
-    if update_execute('update storage set path = %s where username = %s and path = %s and name = %s', (path, username, bf_path, bf_name)):
+    if update_execute('update storage set path = %s where username = %s and path = %s and name = %s and trash_can = %s', (path, username, bf_path, bf_name, 0)):
         bf_path = Path(current_app.config['FILES_FOLDER'], 'user', username, bf_path, bf_name)
         af_path = Path(current_app.config['FILES_FOLDER'], 'user', username, af_path, af_name, bf_name)
         try:
@@ -189,32 +194,32 @@ def delete(username, path, name, is_file):
     from diskcloud.models.mysql import select_execute, delete_execute, db_commit, db_rollback
 
     def delete_db(username, path, name):
-        return delete_execute('delete from storage where username = %s and path = %s and name = %s', (username, path, name))
+        return delete_execute('delete from storage where username = %s and path = %s and name = %s and trash_can = %s', (username, path, name, 1))
 
     def delete_folder_db(username, path, name):
         if delete_db(username, path, name):
             path = Path(path, name).as_posix()
-            result = select_execute('select name from storage where username = %s and path = %s and type = %s', (username, path, 0))
+            result = select_execute('select name, type from storage where username = %s and path = %s and trash_can = %s', (username, path, 1))
             for i in range(len(result)):
-                if delete_db(username, path, result[i][0]) is False:
-                    return False
-            result = select_execute('select name from storage where username = %s and path = %s and type = %s', (username, path, 1))
-            for i in range(len(result)):
-                if delete_folder_db(username, path, result[i][0]) is False:
-                    return False
+                if result[i][1] == 0:
+                    if delete_db(username, path, result[i][0]) is False:
+                        return False
+                else:
+                    if delete_folder_db(username, path, result[i][0]) is False:
+                        return False
             return True
         return False
 
     def in_trash_can(username, path, name):
-        result = select_execute('select trash_can from storage where username = %s and path = %s and name = %s', (username, path, name))
-        if result[0][0] == '1':
+        result = select_execute('select name from storage where username = %s and path = %s and name = %s and trash_can = %s', (username, path, name, 1))
+        if len(result) != 0:
             return True
         return False
 
     if in_trash_can(username, path, name):
-        if is_file is True:
+        if is_file:
             if delete_db(username, path, name):
-                path = Path(current_app.config['FILES_FOLDER'], 'user', username, path, name).as_posix()
+                path = Path(current_app.config['FILES_FOLDER'], 'trash_can', username, path, name).as_posix()
                 try:
                     remove(path)
                 except:
@@ -226,7 +231,7 @@ def delete(username, path, name, is_file):
                 return gen_error_res('fail to update datebase', 500)
         else:
             if delete_folder_db(username, path, name):
-                path = Path(current_app.config['FILES_FOLDER'], 'user', username, path, name).as_posix()
+                path = Path(current_app.config['FILES_FOLDER'], 'trash_can', username, path, name).as_posix()
                 try:
                     rmtree(path)
                 except:
@@ -304,7 +309,7 @@ def star(username, path, name):
     from diskcloud.models.response import gen_error_res
     from diskcloud.models.time import now_time_str
 
-    result = update_execute('update storage set star = %s, star_time = %s where username = %s and path = %s and name = %s', (1, now_time_str(), username, path, name))
+    result = update_execute('update storage set star = %s, star_time = %s where username = %s and path = %s and name = %s and trash_can = %s', (1, now_time_str(), username, path, name, 0))
     if result:
         db_commit()
         return ('', 200)
@@ -315,35 +320,119 @@ def unstar(username, path, name):
     from diskcloud.models.mysql import update_execute, db_commit, db_rollback
     from diskcloud.models.response import gen_error_res
 
-    result = update_execute('update storage set star = %s, star_time = %s where username = %s and path = %s and name = %s', (0, None, username, path, name))
+    result = update_execute('update storage set star = %s, star_time = %s where username = %s and path = %s and name = %s and trash_can = %s', (0, None, username, path, name, 0))
     if result:
         db_commit()
         return ('', 200)
     db_rollback()
     return gen_error_res('fail to update datebase', 500)
 
-def trash_can(username, path, name):
-    from diskcloud.models.mysql import update_execute, db_commit, db_rollback
+def trash_can(username, path, name, is_file):
+    from diskcloud.models.mysql import select_execute, update_execute, db_commit, db_rollback
     from diskcloud.models.response import gen_error_res
     from diskcloud.models.time import now_time_str
+    from pathlib import Path
+    from flask import current_app
+    from shutil import move
 
-    result = update_execute('update storage set trash_can = %s, trash_can_time = %s where username = %s and path = %s and name = %s', (1, now_time_str(), username, path, name))
+    def walk(username, path, af_path):
+        result = select_execute('select name, type from storage where username = %s and path = %s and trash_can = %s', (username, path, 0))
+        update_result = True
+        for i in range(len(result)):
+            update_result = update_result and update_execute('update storage set path = %s, trash_can = %s, trash_can_time = %s where username = %s and path = %s and name = %s and trash_can = %s', (af_path, 1, now_time_str(), username, path, result[i][0], 0))
+            if result[i][1] == 1:
+                update_result = update_result and walk(username, Path(path, result[i][0]).as_posix(), Path(af_path, result[i][0]).as_posix())
+        return update_result
+
+    af_name = generate_name(username, path, name, 1)
+    result = update_execute('update storage set name = %s, trash_can = %s, trash_can_time = %s where username = %s and path = %s and name = %s and trash_can = %s', (af_name, 1, now_time_str(), username, path, name, 0))
+
+    if not is_file:
+        result = result and walk(username, Path(path, name).as_posix(), Path(path, af_name).as_posix())
     if result:
+        bf_path = Path(current_app.config['FILES_FOLDER'], 'user', username, path, name).as_posix()
+        af_path = Path(current_app.config['FILES_FOLDER'], 'trash_can', username, path, af_name).as_posix()
+        try:
+            move(bf_path, af_path)
+        except:
+            db_rollback()
+            return gen_error_res('fail to move', 500)
         db_commit()
         return ('', 200)
     db_rollback()
     return gen_error_res('fail to update datebase', 500)
 
-def untrash_can(username, path, name):
-    from diskcloud.models.mysql import update_execute, db_commit, db_rollback
+def untrash_can(username, path, name, is_file):
+    from diskcloud.models.mysql import select_execute, update_execute, db_commit, db_rollback
     from diskcloud.models.response import gen_error_res
+    from diskcloud.models.time import now_time_str
+    from pathlib import Path
+    from flask import current_app
+    from shutil import move
 
-    result = update_execute('update storage set trash_can = %s, trash_can_time = %s where username = %s and path = %s and name = %s', (0, None, username, path, name))
+    def walk(username, path, af_path):
+        result = select_execute('select name, type from storage where username = %s and path = %s and trash_can = %s', (username, path, 1))
+        update_result = True
+        for i in range(len(result)):
+            update_result = update_result and update_execute('update storage set path = %s, trash_can = %s, trash_can_time = %s where username = %s and path = %s and name = %s and trash_can = %s', (af_path, 0, now_time_str(), username, path, result[i][0], 1))
+            if result[i][1] == 1:
+                update_result = update_result and walk(username, Path(path, result[i][0]).as_posix(), Path(af_path, result[i][0]).as_posix())
+        return update_result
+
+    af_name = generate_name(username, path, name, 0)
+    result = update_execute('update storage set name = %s, trash_can = %s, trash_can_time = %s where username = %s and path = %s and name = %s and trash_can = %s', (af_name, 0, None, username, path, name, 1))
+
+    if not is_file:
+        result = result and walk(username, Path(path, name).as_posix(), Path(path, af_name).as_posix())
     if result:
+        bf_path = Path(current_app.config['FILES_FOLDER'], 'trash_can', username, path, name).as_posix()
+        af_path = Path(current_app.config['FILES_FOLDER'], 'user', username, path, af_name).as_posix()
+        try:
+            move(bf_path, af_path)
+        except:
+            db_rollback()
+            return gen_error_res('fail to move', 500)
         db_commit()
         return ('', 200)
     db_rollback()
     return gen_error_res('fail to update datebase', 500)
+
+def generate_name(username, path, name, trash_can):
+    from diskcloud.models.mysql import select_execute
+    from re import escape
+
+    def get_index(name):
+        name_stem = name.rsplit('.', maxsplit = 1)[0]
+        index1 = name_stem.rfind('(')
+        index2 = name_stem.rfind(')')
+        index = int(name_stem[index1 + 1: index2])
+        return index
+
+    name_stem =  name.rsplit('.', maxsplit = 1)[0]
+    try:
+        name_suffix = name.rsplit('.', maxsplit = 1)[1]
+    except IndexError:
+        name_suffix = ''
+    if name_suffix == '':
+        name_exp = '^' + escape(name) + '(\\([1-9]{1}[0-9]*\\))?$'
+    else:
+        name_exp = '^' + escape(name_stem) + '(\\([1-9]{1}[0-9]*\\))?\\.' + escape(name_suffix) + '$'
+    result = select_execute('select name from storage where username = %s and path = %s and name REGEXP %s and trash_can = %s', (username, path, name_exp, trash_can))
+    number = []
+    for i in range(len(result)):
+        if result[i][0] == name:
+            number.append(0)
+        else:
+            number.append(get_index(result[i][0]))
+    for i in range(10000):
+        if i not in number:
+            if i == 0:
+                add_str = ''
+            else:
+                add_str = '(' + str(i) + ')'
+            break
+    index = len(name_stem)
+    return name[0:index] + add_str + name[index:]
 
 def get_mime(path):
     from .mime import MIME

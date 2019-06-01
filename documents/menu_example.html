@@ -17,17 +17,19 @@ if(mode === 'entry')
   <div class='menu_entry' id='menu_star'>收藏</div> 8
   if(isStared && CURRENTPATH !== 'trash_can')
   <div class='menu_entry' id='menu_unstar'>取消收藏</div> 9
+  if(CURRENTPATH !== 'star' || CURRENTPATH !== 'share' || currentTarget !== 'search' || CURRENTPATH !== 'trash_can')
+  <div class='menu_entry' id='menu_move'>移动到</div> 10
   if(CURRENTPATH !== 'trash_can')
-  <div class='menu_entry' id='menu_rename'>重命名</div> 10
+  <div class='menu_entry' id='menu_rename'>重命名</div> 11
   if(CURRENTPATH !== 'trash_can')
-  <div class='menu_entry' id='menu_delete'>删除</div> 11
+  <div class='menu_entry' id='menu_delete'>删除</div> 12
   if(CURRENTPATH === 'trash_can')
-  <div class='menu_entry' id='menu_undelete'>还原</div> 12
+  <div class='menu_entry' id='menu_undelete'>还原</div> 13
   if(CURRENTPATH === 'trash_can')
-  <div class='menu_entry' id='menu_delete'>永久删除</div> 13
+  <div class='menu_entry' id='menu_delete'>永久删除</div> 14
 if(mode === 'blank')
-<div class='menu_entry' id='menu_refresh'>刷新</div> 14
-<div class='menu_entry' id='menu_create_file'>新建文件</div> 15
-<div class='menu_entry' id='menu_create_folder'>新建文件夹</div> 16
-<div class='menu_entry' id='menu_upload_file'>上传文件</div> 17
+<div class='menu_entry' id='menu_refresh'>刷新</div> 15
+<div class='menu_entry' id='menu_create_file'>新建文件</div> 16
+<div class='menu_entry' id='menu_create_folder'>新建文件夹</div> 17
+<div class='menu_entry' id='menu_upload_file'>上传文件</div> 18
 </div>

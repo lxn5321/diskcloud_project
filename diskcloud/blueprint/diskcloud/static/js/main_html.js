@@ -17,28 +17,18 @@ function init_all() {
   $(".confirm_modal").on('shown.bs.modal', function() {
     $('#name_input').focus();
   });
-  document.querySelector("#logout_btn").addEventListener('click', () => {
+  document.querySelector("#logout_btn").addEventListener("click", () => {
     window.location.replace(PARADICT["logout_url"]);
   });
-  document.querySelector(".whole-container").addEventListener('click', wholeContainerClickHandler);
-  document.querySelector(".whole-container").addEventListener('contextmenu', wholeContainerRightClickHandler);
-  document.querySelector(".sidebar").addEventListener('click', sidebarClickHandler);
+  document.querySelector(".whole-container").addEventListener("click", wholeContainerClickHandler);
+  document.querySelector(".whole-container").addEventListener("contextmenu", wholeContainerRightClickHandler);
+  document.querySelector(".sidebar").addEventListener("click", sidebarClickHandler);
   document.querySelector(".right-container").addEventListener("click", rightContainerClickHandler);
   document.querySelector(".right-container").addEventListener("dblclick", rightContainerDbClickHandler);
   document.querySelector(".right-container").addEventListener("contextmenu", rightContainerRightClickHandler);
-  document.querySelector(".menu").addEventListener('click', menuClickHandler);
-  document.querySelector(".menu").addEventListener('contextmenu', mouseMenuRightClickHandler);
-}
-
-function draw_all(path = CURRENTPATH) {
-  CURRENTPATH = path;
-
-  function exec_func(data) {
-    JSONDATA = data;
-    createTable();
-    createBreadCrumb();
-  }
-  get_json(path, exec_func);
+  document.querySelector(".menu").addEventListener("click", menuClickHandler);
+  document.querySelector(".menu").addEventListener("contextmenu", mouseMenuRightClickHandler);
+  document.querySelector("#search-btn").addEventListener("click", searchBtnClickHandler);
 }
 
 function resize() {
@@ -46,6 +36,28 @@ function resize() {
   H = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
   let height = H - 53;
   $(".main-container").css("height", height);
+}
+
+function draw_all(path = CURRENTPATH, selected_name = '') {
+  CURRENTPATH = path;
+  function exec_func(data) {
+    JSONDATA = data;
+    createTable();
+    createBreadCrumb();
+
+    if(selected_name !== ''){
+      let entryRows = document.querySelectorAll('.right-container .entry-row');
+      let selectedElem;
+      for(let i = 0; i < entryRows.length; i++){
+        if(entryRows[i].querySelector('.content').innerText === selected_name){
+          selectedElem = entryRows[i];
+          break;
+        }
+      }
+      select(selectedElem, '.right-container');
+    }
+  }
+  get_json(path, exec_func);
 }
 
 function get_json(path, exec_func = null) {
@@ -59,9 +71,7 @@ function get_json(path, exec_func = null) {
   } else {
     url = PARADICT["file_api_url"] + PARADICT["username"] + pathParseUrl() + "?info=1";
   }
-  fetch(url, {
-      credentials: "same-origin"
-    })
+  fetch(url, {credentials: "same-origin"})
     .then(function(response) {
       if (response.ok) {
         response.json().then(function(data) {
@@ -71,7 +81,7 @@ function get_json(path, exec_func = null) {
         })
       } else {
         // need to develop
-        return false;
+        alert('获取数据失败')
       }
     });
 }
@@ -195,7 +205,7 @@ function error_message(mes, promt = true, jsondata = null) {
     message = mes + jsondata.err_mes;
   }
   if (promt === true) {
-    return '<div class="hint-container promt-container"><div class="error_icon"></div><div id="fail_hint" class=" text-danger content">' + message + '</div></div>';
+    return '<div class="promt-container"><div class="error_icon"></div><div id="fail_hint" class=" text-danger content">' + message + '</div></div>';
   } else {
     return '<div class="hint-container"><div class="error_icon"></div><div id="fail_hint" class="text-danger content">' + message + '</div></div>';
   }
@@ -208,10 +218,7 @@ function createTable(data = JSONDATA) {
   // change title row
   let titleCol2 = $("#title-col-2");
   let titleCol3 = $("#title-col-3");
-  if (CURRENTPATH === '.' || CURRENTPATH === "search") {
-    titleCol2.text("大小");
-    titleCol3.text("修改日期");
-  } else if (CURRENTPATH === 'star') {
+  if (CURRENTPATH === 'star') {
     titleCol2.text("大小");
     titleCol3.text("收藏日期");
   } else if (CURRENTPATH === 'trash_can'){
@@ -220,6 +227,9 @@ function createTable(data = JSONDATA) {
   } else if (CURRENTPATH === 'share') {
     titleCol2.text("分享日期");
     titleCol3.text("过期日期");
+  }else{
+    titleCol2.text("大小");
+    titleCol3.text("修改日期");
   }
   // if dir row or file row exist,remove
   if (entryRow) {
@@ -419,7 +429,6 @@ function createTable(data = JSONDATA) {
       cacheArray.push(fileRow);
     }
   }
-
   entryContainer.append(cacheArray);
 }
 
@@ -540,6 +549,9 @@ function showMenu(ev, mode) {
         htmlArray[5] = "<div class='menu_entry' id='menu_get_share_url'>获取分享链接</div>";
         htmlArray[7] = "<div class='menu_entry' id='menu_unshare'>取消分享</div>";
       }else{
+        if(CURRENTPATH !== 'star' && CURRENTPATH !== 'search'){
+          htmlArray[10] = "<div class='menu_entry' id='menu_move'>移动到</div>";
+        }
         htmlArray[6] = "<div class='menu_entry' id='menu_share'>分享</div>";
       }
       if(!isStared){
@@ -550,27 +562,27 @@ function showMenu(ev, mode) {
       if(CURRENTPATH === 'star' || CURRENTPATH === 'search'){
         htmlArray[3] = "<div class='menu_entry' id='menu_redirect'>显示位置</div>";
       }
-      htmlArray[10] = "<div class='menu_entry' id='menu_rename'>重命名</div>";
-      htmlArray[11] = "<div class='menu_entry' id='menu_remove'>删除</div>";
+      htmlArray[11] = "<div class='menu_entry' id='menu_rename'>重命名</div>";
+      htmlArray[12] = "<div class='menu_entry' id='menu_remove'>删除</div>";
     }else{
-      htmlArray[12] = "<div class='menu_entry' id='menu_restore'>还原</div>";
-      htmlArray[13] = "<div class='menu_entry' id='menu_delete'>永久删除</div>";
+      htmlArray[13] = "<div class='menu_entry' id='menu_restore'>还原</div>";
+      htmlArray[14] = "<div class='menu_entry' id='menu_delete'>永久删除</div>";
     }
   }else if(mode === 'blank'){
-    htmlArray[14] = "<div class='menu_entry' id='menu_refresh'>刷新</div>";
-    htmlArray[15] = "<div class='menu_entry' id='menu_create_file'>新建文件</div>";
-    htmlArray[16] = "<div class='menu_entry' id='menu_create_folder'>新建文件夹</div>";
-    htmlArray[17] ="<div class='menu_entry' id='menu_upload_file'>上传文件</div>";
+    htmlArray[15] = "<div class='menu_entry' id='menu_refresh'>刷新</div>";
+    htmlArray[16] = "<div class='menu_entry' id='menu_create_file'>新建文件</div>";
+    htmlArray[17] = "<div class='menu_entry' id='menu_create_folder'>新建文件夹</div>";
+    htmlArray[18] ="<div class='menu_entry' id='menu_upload_file'>上传文件</div>";
   }
   htmlArray.push("</div>");
   height = (htmlArray.filter(n => n).length - 3) * 30 + 15;
   if(htmlArray[5]){
     width = 122;
-  }else if(htmlArray[16]){
+  }else if(htmlArray[17]){
     width = 106;
-  }else if(htmlArray[3] || htmlArray[7] || htmlArray[9] || htmlArray[13] || htmlArray[15] || htmlArray[17]){
+  }else if(htmlArray[3] || htmlArray[7] || htmlArray[9] || htmlArray[14] || htmlArray[16] || htmlArray[18]){
     width = 90;
-  }else if(htmlArray[10]){
+  }else if(htmlArray[10] || htmlArray[11]){
     width = 74;
   }
   menu.innerHTML = htmlArray.join('');
@@ -601,7 +613,7 @@ function wholeContainerRightClickHandler(ev){
 function sidebarClickHandler(ev) {
   if (document.querySelector('#sidebar-my_file').contains(ev.target)) {
     let target = document.querySelector('#sidebar-my_file');
-    if (!target.classList.contains("selectd")) {
+    if (!target.classList.contains("selected")) {
       select(target, ".sidebar");
       draw_all('.');
     }
@@ -638,9 +650,7 @@ function rightContainerClickHandler(ev) {
 function rightContainerDbClickHandler(ev) {
   ev.stopPropagation();
   if (contain(".folder-row", ev.target)) {
-    let name = document.querySelector(".right-container .selected .content").innerText;
-    let path = CURRENTPATH + "/" + name;
-    draw_all(path);
+    openEntry();
   }
 }
 
@@ -727,23 +737,53 @@ function menuClickHandler(ev) {
     ev.stopPropagation();
     document.querySelector('.menu').style.display = 'none';
     getShareUrl();
+  } else if (ev.target.id === 'menu_restore'){
+    ev.stopPropagation();
+    document.querySelector('.menu').style.display = 'none';
+    restoreEntry();
+  } else if (ev.target.id === 'menu_delete'){
+    ev.stopPropagation();
+    document.querySelector('.menu').style.display = 'none';
+    deleteEntry();
   }
 }
 
 function breadCrumbClickHandler(ev) {
   // update CURRENTPATH
-  let path;
-  _PATHID = parseInt(ev.target.id.slice(7));
-  if (_PATHID === 0) {
-    path = ".";
-  } else {
-    let index = 1;
-    for (let i = 0; i < _PATHID; i++) {
-      index = CURRENTPATH.indexOf("/", index + 1);
+  if(CURRENTPATH !== 'star' && CURRENTPATH !== 'share' && CURRENTPATH !== 'trash_can' && CURRENTPATH !== 'search'){
+    let path;
+    _PATHID = parseInt(ev.target.id.slice(7));
+    if (_PATHID === 0) {
+      path = ".";
+    } else {
+      let index = 1;
+      for (let i = 0; i < _PATHID; i++) {
+        index = CURRENTPATH.indexOf("/", index + 1);
+      }
+      path = CURRENTPATH.slice(0, index);
     }
-    path = CURRENTPATH.slice(0, index);
+    draw_all(path);
   }
-  draw_all(path);
+}
+
+function searchBtnClickHandler(ev){
+  let searchText = document.querySelector('#search-input').value;
+  let url = PARADICT["file_api_url"] + PARADICT["username"] + "/?search_info=1&search_text=" + searchText;
+
+  fetch(url, {credentials: "same-origin"})
+  .then(response => {
+    if(response.ok){
+      response.json().then(data => {
+        CURRENTPATH = 'search';
+        JSONDATA = data;
+        unselect('.sidebar');
+        createTable();
+        createBreadCrumb();
+      })
+    }else{
+      alert('获取数据失败')
+    }
+  })
 }
 
 function openEntry(){
@@ -753,7 +793,7 @@ function openEntry(){
     path = get_path_from_json();
     path = path + '/' + name;
     draw_all(path);
-  }else{
+  }else if(CURRENTPATH !== 'trash_can'){
     path = CURRENTPATH + "/" + name;
     draw_all(path);
   }
@@ -762,7 +802,12 @@ function openEntry(){
 function downloadEntry() {
   let name = document.querySelector(".right-container .selected .content").innerText;
   let isFileRow = document.querySelector('.right-container .selected').classList.contains('file-row');
-  let url = PARADICT["file_api_url"] + PARADICT["username"] + pathParseUrl() + name + '/';
+  let url;
+  if(CURRENTPATH == 'share' || CURRENTPATH == 'star' || CURRENTPATH == 'search'){
+    url = PARADICT["file_api_url"] + PARADICT["username"] + get_path_from_json().slice(1) + '/' + name + '/'
+  }else{
+    url = PARADICT["file_api_url"] + PARADICT["username"] + pathParseUrl() + name + '/';
+  }
   let modal = $(".confirm_modal");
   let content = isFileRow ? "确认下载该文件吗？" : "确认下载该文件夹吗？";
   content += "<a download href='" + url + "' class='hiden_link'></a>";
@@ -780,7 +825,12 @@ function downloadEntry() {
 
 function shareEntry() {
   let name = document.querySelector(".right-container .selected .content").innerText;
-  let url = PARADICT["file_api_url"] + PARADICT["username"] + pathParseUrl() + name + '/?share=1';
+  let url;
+  if(CURRENTPATH == 'share' || CURRENTPATH == 'star' || CURRENTPATH == 'search'){
+    url = PARADICT["file_api_url"] + PARADICT["username"] + get_path_from_json().slice(1) + '/' + name + '/?share=1'
+  }else{
+    url = PARADICT["file_api_url"] + PARADICT["username"] + pathParseUrl() + name + '/?share=1';
+  }
   let modal = $(".confirm_modal");
   let modalTitle = modal.find(".modal-title");
   let modalPrompt = modal.find(".modal-prompt");
@@ -830,9 +880,10 @@ function shareEntry() {
 
 function unshareEntry(){
   let name = document.querySelector(".right-container .selected .content").innerText;
+  let path = get_path_from_json().slice(1);
   let isFileRow = document.querySelector('.right-container .selected').classList.contains('file-row');
   let format = isFileRow ? "文件" : "文件夹";
-  let url = PARADICT["file_api_url"] + PARADICT["username"] + pathParseUrl() + name + '/?share=0';
+  let url = PARADICT["file_api_url"] + PARADICT["username"] + path + '/' + name + '/?share=0';
   let modal = $(".confirm_modal");
   let modalTitle = modal.find(".modal-title");
   let modalPrompt = modal.find(".modal-prompt");
@@ -1034,8 +1085,16 @@ function moveEntry() {
 }
 
 function renameEntry() {
-  let name = document.querySelector(".right-container .selected .content").innerText;
-  let url = PARADICT["file_api_url"] + PARADICT["username"] + pathParseUrl() + name + '/?af_name=';
+  let selected = document.querySelector('.right-container .selected');
+  let isFileRow = selected.classList.contains('file-row');
+  let name = selected.querySelector(".content").innerText;
+  let re;
+  let url;
+  if(CURRENTPATH == 'share' || CURRENTPATH == 'star' || CURRENTPATH == 'search'){
+    url = PARADICT["file_api_url"] + PARADICT["username"] + get_path_from_json().slice(1) + '/' + name + '/'
+  }else{
+    url = PARADICT["file_api_url"] + PARADICT["username"] + pathParseUrl() + name + '/';
+  }
   let modal = $(".confirm_modal");
   let modalTitle = modal.find(".modal-title");
   let modalPrompt = modal.find(".modal-prompt");
@@ -1048,23 +1107,28 @@ function renameEntry() {
   modalFooter.html('<button type="button" class="btn btn-primary">确认</button><button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>');
   let confirmButton = modalFooter.find('.btn-primary');
   confirmButton.off().on("click", function() {
-    after_name = document.querySelector("#name_input").value;
-    if (ev.data.id.includes("file-row")) {
-      let re = /^[\w\u4e00-\u9fa5!@#$%,\+\-\^]{1}([ ]?[\w\u4e00-\u9fa5!@#$%,.\+\-\^])*[ ]?[\w\u4e00-\u9fa5!@#$%,\+\-\^]{1}$/;
+    let after_name = document.querySelector("#name_input").value;
+    if (isFileRow) {
+      re = /^[\w\u4e00-\u9fa5!@#$%,\+\-\^\(\)]{1}([ ]?[\w\u4e00-\u9fa5!@#$%,.\+\-\^\(\)])*?[\w\u4e00-\u9fa5!@#$%,\+\-\^\(\)]{1}$/;
     } else {
-      let re = /^[\w\u4e00-\u9fa5!@#$%,\+\-\^]{1}([ ]?[\w\u4e00-\u9fa5!@#$%,\+\-\^])*$/;
+      re = /^[\w\u4e00-\u9fa5!@#$%,\+\-\^\(\)]{1}([ ]?[\w\u4e00-\u9fa5!@#$%,\+\-\^\(\)])*$/;
     }
     let have_same = have_same_file(after_name, JSONDATA);
     if (re.test(name) && name.length <= 255 && !have_same) {
-      url = url + after_name;
       fetch(url, {
           credentials: "same-origin",
-          method: "PATCH"
+          method: "PATCH",
+          body: JSON.stringify({
+            af_name: after_name
+          }),
+          headers: {
+            'content-type': 'application/json'
+          }
         })
         .then(function(response) {
           confirmButton.css("display", "none");
           if (response.ok) {
-            namefield.innerHTML = after_name;
+            selected.querySelector('.content').innerText = after_name;
             modalPrompt.text("");
             modalTitle.text("重命名成功");
             modalBody.html(success_message("已成功重命名"));
@@ -1088,7 +1152,12 @@ function starEntry() {
   let name = document.querySelector(".right-container .selected .content").innerText;
   let isFileRow = document.querySelector('.right-container .selected').classList.contains('file-row');
   let format = isFileRow ? "文件" : "文件夹";
-  let url = PARADICT["file_api_url"] + PARADICT["username"] + pathParseUrl() + name + '/?star=1';
+  let url;
+  if(CURRENTPATH == 'share' || CURRENTPATH == 'star' || CURRENTPATH == 'search'){
+    url = PARADICT["file_api_url"] + PARADICT["username"] + get_path_from_json().slice(1) + '/' + name + '/?star=1'
+  }else{
+    url = PARADICT["file_api_url"] + PARADICT["username"] + pathParseUrl() + name + '/?star=1';
+  }
   let modal = $(".confirm_modal");
   let modalTitle = modal.find(".modal-title");
   let modalPrompt = modal.find(".modal-prompt");
@@ -1128,7 +1197,12 @@ function unstarEntry() {
   let name = document.querySelector(".right-container .selected .content").innerText;
   let isFileRow = document.querySelector('.right-container .selected').classList.contains('file-row');
   let format = isFileRow ? "文件" : "文件夹";
-  let url = PARADICT["file_api_url"] + PARADICT["username"] + pathParseUrl() + name + '/?star=0';
+  let url;
+  if(CURRENTPATH == 'share' || CURRENTPATH == 'star' || CURRENTPATH == 'search'){
+    url = PARADICT["file_api_url"] + PARADICT["username"] + get_path_from_json().slice(1) + '/' + name + '/?star=0'
+  }else{
+    url = PARADICT["file_api_url"] + PARADICT["username"] + pathParseUrl() + name + '/?star=0';
+  }
   let modal = $(".confirm_modal");
   let modalTitle = modal.find(".modal-title");
   let modalPrompt = modal.find(".modal-prompt");
@@ -1169,7 +1243,12 @@ function removeEntry() {
   let name = entry.querySelector(".content").innerText;
   let isFileRow = document.querySelector('.right-container .selected').classList.contains('file-row');
   let format = isFileRow ? "文件" : "文件夹";
-  let url = PARADICT["file_api_url"] + PARADICT["username"] + pathParseUrl() + name + '/?trash_can=1';
+  let url;
+  if(CURRENTPATH == 'share' || CURRENTPATH == 'star' || CURRENTPATH == 'search'){
+    url = PARADICT["file_api_url"] + PARADICT["username"] + get_path_from_json().slice(1) + '/' + name + '/?trash_can=1'
+  }else{
+    url = PARADICT["file_api_url"] + PARADICT["username"] + pathParseUrl() + name + '/?trash_can=1';
+  }
   let modal = $(".confirm_modal");
   let modalTitle = modal.find(".modal-title");
   let modalPrompt = modal.find(".modal-prompt");
@@ -1205,10 +1284,92 @@ function removeEntry() {
   modal.modal('show');
 }
 
+function restoreEntry() {
+  let entry = document.querySelector(".right-container .selected");
+  let name = entry.querySelector(".content").innerText;
+  let isFileRow = document.querySelector('.right-container .selected').classList.contains('file-row');
+  let format = isFileRow ? "文件" : "文件夹";
+  let url = PARADICT["file_api_url"] + PARADICT["username"] + get_path_from_json().slice(1) + '/' + name + '/?trash_can=0';
+  let modal = $(".confirm_modal");
+  let modalTitle = modal.find(".modal-title");
+  let modalPrompt = modal.find(".modal-prompt");
+  let modalBody = modal.find(".modal-body");
+  let modalFooter = modal.find(".modal-footer");
+  // add content
+  modalTitle.text("确认还原");
+  modalPrompt.text("");
+  modalBody.text("确认将该" + format + "还原吗？");
+  modalFooter.html('<button type="button" class="btn btn-primary">确认</button><button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>');
+
+  let confirmButton = modalFooter.find('.btn-primary');
+  confirmButton.off().one("click", function() {
+    fetch(url, {
+        credentials: "same-origin",
+        method: "PATCH"
+      })
+      .then(function(response) {
+        confirmButton.css("display", "none");
+        if (response.ok) {
+          entry.style.display = 'none';
+          modalPrompt.text("");
+          modalTitle.text("还原成功");
+          modalBody.html(success_message("已成功还原"));
+        } else {
+          response.json().then(function(data) {
+            modalTitle.text("发生了一个错误");
+            modalBody.html(error_message("还原失败", false, data))
+          })
+        }
+      })
+  });
+  modal.modal('show');
+}
+function deleteEntry(){
+  let entry = document.querySelector(".right-container .selected");
+  let name = entry.querySelector(".content").innerText;
+  let isFileRow = document.querySelector('.right-container .selected').classList.contains('file-row');
+  let format = isFileRow ? "文件" : "文件夹";
+  let url = PARADICT["file_api_url"] + PARADICT["username"] + get_path_from_json().slice(1) + '/' + name + '/';
+  let modal = $(".confirm_modal");
+  let modalTitle = modal.find(".modal-title");
+  let modalPrompt = modal.find(".modal-prompt");
+  let modalBody = modal.find(".modal-body");
+  let modalFooter = modal.find(".modal-footer");
+  // add content
+  modalTitle.text("确认彻底删除");
+  modalPrompt.text("");
+  modalBody.text("确认将该" + format + "彻底删除？\n该操作无法撤销！");
+  modalFooter.html('<button type="button" class="btn btn-primary">确认</button><button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>');
+
+  let confirmButton = modalFooter.find('.btn-primary');
+  confirmButton.off().one("click", function() {
+    fetch(url, {
+        credentials: "same-origin",
+        method: "DELETE"
+      })
+      .then(function(response) {
+        confirmButton.css("display", "none");
+        if (response.ok) {
+          entry.style.display = 'none';
+          modalPrompt.text("");
+          modalTitle.text("彻底删除成功");
+          modalBody.html(success_message("已成功彻底删除"));
+        } else {
+          response.json().then(function(data) {
+            modalTitle.text("发生了一个错误");
+            modalBody.html(error_message("彻底删除失败", false, data))
+          })
+        }
+      })
+  });
+  modal.modal('show');
+}
+
 function redirectEntry(){
+  let name = document.querySelector('.right-container .selected .content').innerText;
   let path = get_path_from_json();
-  select(document.querySelector("#sidebar-my_file"), '.sidebar');
-  draw_all(path);
+  select(document.querySelector('#sidebar-my_file'), '.sidebar');
+  draw_all(path, name);
 }
 
 function getShareUrl(){
@@ -1250,7 +1411,7 @@ function getShareUrl(){
 function uploadFiles(files) {
   let formData = new FormData();
   let url = PARADICT["file_api_url"] + PARADICT["username"] + pathParseUrl() + "?upload_files=1"
-  let re = /^[\w\u4e00-\u9fa5!@#$%,\+\-\^]{1}([ ]?[\w\u4e00-\u9fa5!@#$%,.\+\-\^])*[ ]?[\w\u4e00-\u9fa5!@#$%,\+\-\^]{1}$/;
+  let re = /^[\w\u4e00-\u9fa5!@#$%,\+\-\^\(\)]{1}([ ]?[\w\u4e00-\u9fa5!@#$%,.\+\-\^\(\)])*?[\w\u4e00-\u9fa5!@#$%,\+\-\^\(\)]{1}$/;
   let modal = $(".confirm_modal");
   let modalTitle = modal.find(".modal-title");
   let modalPrompt = modal.find(".modal-prompt");
@@ -1265,13 +1426,13 @@ function uploadFiles(files) {
     if (have_same_file(files[i].name, JSONDATA)) {
       same = true;
       modalTitle.text("上传失败");
-      modalBody.html(error_message("当前目录内有与上传文件相同名称的文件或者文件夹."));
+      modalBody.html(error_message("当前目录内有与上传文件相同名称的文件或者文件夹.", false));
       break;
     }
     if (!re.test(files[i].name) || files[i].name.length > 255) {
       valid = false;
       modalTitle.text("上传失败");
-      modalBody.html(error_message("上传文件名称不合法."));
+      modalBody.html(error_message("上传文件名称不合法.", false));
       break;
     }
     formData.append('file' + i, files[i]);
@@ -1307,7 +1468,7 @@ function createFile() {
   let modalPrompt = modal.find(".modal-prompt");
   let modalBody = modal.find(".modal-body");
   let modalFooter = modal.find(".modal-footer");
-  let re = /^[\w\u4e00-\u9fa5!@#$%,\+\-\^]{1}([ ]?[\w\u4e00-\u9fa5!@#$%,.\+\-\^])*[ ]?[\w\u4e00-\u9fa5!@#$%,\+\-\^]{1}$/;
+  let re = /^[\w\u4e00-\u9fa5!@#$%,\+\-\^\(\)]{1}([ ]?[\w\u4e00-\u9fa5!@#$%,.\+\-\^\(\)])*?[\w\u4e00-\u9fa5!@#$%,\+\-\^\(\)]{1}$/;
   // add content
   modalTitle.text("创建新文件");
   modalPrompt.text("");
@@ -1353,7 +1514,7 @@ function createFolder() {
   let modalPrompt = modal.find(".modal-prompt");
   let modalBody = modal.find(".modal-body");
   let modalFooter = modal.find(".modal-footer");
-  let re = /^[\w\u4e00-\u9fa5!@#$%,\+\-\^]{1}([ ]?[\w\u4e00-\u9fa5!@#$%,\+\-\^])*$/;
+  let re = /^[\w\u4e00-\u9fa5!@#$%,\+\-\^\(\)]{1}([ ]?[\w\u4e00-\u9fa5!@#$%,\+\-\^\(\)])*$/;
   // add content
   modalTitle.text("创建新文件夹");
   modalPrompt.text("");
