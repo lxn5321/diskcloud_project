@@ -111,19 +111,35 @@ function get_path_from_json(data = JSONDATA){
   return path;
 }
 
-function strptime(time_str) {
-  if(time_str === 'permanent'){
-    return '永久';
+function is_expire(time_str){
+  let date = new Date('20' + time_str.slice(0, 2), parseInt(time_str.slice(2, 4)) - 1, time_str.slice(4, 6), time_str.slice(6, 8), time_str.slice(8, 10), time_str.slice(10, 12))
+  let now_date = new Date()
+
+  if(date.getTime() <= now_date.getTime()){
+    return true
+  }else{
+    return false
   }
+}
 
-  let year = '20' + time_str.slice(0, 2);
-  let month = time_str.slice(2, 4);
-  let day = time_str.slice(4, 6);
-  let hour = time_str.slice(6, 8);
-  let minute = time_str.slice(8, 10);
-  let second = time_str.slice(10, 12);
-  let time = year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second
+function strptime(time_str, is_expire_time = false) {
+  let time;
+  if(time_str === 'permanent'){
+    time = '永久';
+  }else{
+    let year = '20' + time_str.slice(0, 2);
+    let month = time_str.slice(2, 4);
+    let day = time_str.slice(4, 6);
+    let hour = time_str.slice(6, 8);
+    let minute = time_str.slice(8, 10);
+    let second = time_str.slice(10, 12);
 
+    if(is_expire_time === true && is_expire(time_str)){
+      time = '已过期';
+    }else{
+      time = year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second;
+    }
+  }
   return time;
 }
 
@@ -277,7 +293,7 @@ function createTable(data = JSONDATA) {
       let content = $("<div class='content'></div>").text(data.directories[n][0]);
       let starIcon = $("<i class='far fa-star star_icon'></i>");
       let shareTimeCol = $("<div class='col-2 share_time-col'></div>").text(strptime(data.directories[n][1]));
-      let expireTimeCol = $("<div class='col-2 expire_time-col'></div>").text(strptime(data.directories[n][2]));
+      let expireTimeCol = $("<div class='col-2 expire_time-col'></div>").text(strptime(data.directories[n][2], true));
       iconContainer.append(icon);
       if(data.directories[n][3] === 1){
         nameCol.append(iconContainer, content, starIcon);
@@ -297,7 +313,7 @@ function createTable(data = JSONDATA) {
       let content = $("<div class='content'></div>").text(fileName);
       let starIcon = $("<i class='far fa-star star_icon'></i>");
       let shareTimeCol = $("<div class='col-2 share_time-col'></div>").text(strptime(data.files[n][1]));
-      let expireTimeCol = $("<div class='col-2 expire_time-col'></div>").text(strptime(data.files[n][2]));
+      let expireTimeCol = $("<div class='col-2 expire_time-col'></div>").text(strptime(data.files[n][2], true));
       parse_suffix(icon, fileName);
       iconContainer.append(icon);
       if(data.files[n][3] === 1){
@@ -546,8 +562,12 @@ function showMenu(ev, mode) {
       htmlArray[4] = "<div class='menu_entry' id='menu_download'>下载</div>";
       if(CURRENTPATH === 'share'){
         htmlArray[3] = "<div class='menu_entry' id='menu_redirect'>显示位置</div>"
-        htmlArray[5] = "<div class='menu_entry' id='menu_get_share_url'>获取分享链接</div>";
-        htmlArray[7] = "<div class='menu_entry' id='menu_unshare'>取消分享</div>";
+        if(selectedElem.querySelector('.expire_time-col').innerText === '已过期'){
+          htmlArray[6] = "<div class='menu_entry' id='menu_share'>分享</div>";
+        }else{
+          htmlArray[5] = "<div class='menu_entry' id='menu_get_share_url'>获取分享链接</div>";
+          htmlArray[7] = "<div class='menu_entry' id='menu_unshare'>取消分享</div>";
+        }
       }else{
         if(CURRENTPATH !== 'star' && CURRENTPATH !== 'search'){
           htmlArray[10] = "<div class='menu_entry' id='menu_move'>移动到</div>";
@@ -677,73 +697,42 @@ function mouseMenuRightClickHandler(ev) {
 }
 
 function menuClickHandler(ev) {
+  ev.stopPropagation();
+  document.querySelector('.menu').style.display = 'none';
+
   if (ev.target.id === 'menu_refresh') {
-    ev.stopPropagation();
-    document.querySelector('.menu').style.display = 'none';
     draw_all();
   } else if (ev.target.id === 'menu_create_file') {
-    ev.stopPropagation();
-    document.querySelector('.menu').style.display = 'none';
     createFile();
   } else if (ev.target.id === 'menu_create_folder') {
-    ev.stopPropagation();
-    document.querySelector('.menu').style.display = 'none';
     createFolder()
   } else if (ev.target.id === 'menu_upload_file') {
-    ev.stopPropagation()
-    document.querySelector('.menu').style.display = 'none';
     $("#fileElem").click();
   } else if (ev.target.id === 'menu_open') {
-    ev.stopPropagation();
-    document.querySelector('.menu').style.display = 'none';
     openEntry();
   } else if (ev.target.id === 'menu_download') {
-    ev.stopPropagation();
-    document.querySelector('.menu').style.display = 'none';
     downloadEntry();
   } else if (ev.target.id === 'menu_share') {
-    ev.stopPropagation();
-    document.querySelector('.menu').style.display = 'none';
     shareEntry();
   } else if (ev.target.id === 'menu_unshare'){
-    ev.stopPropagation();
-    document.querySelector('.menu').style.display = 'none';
     unshareEntry();
   } else if (ev.target.id === 'menu_move') {
-    ev.stopPropagation();
-    document.querySelector('.menu').style.display = 'none';
     moveEntry();
   } else if (ev.target.id === 'menu_rename') {
-    ev.stopPropagation();
-    document.querySelector('.menu').style.display = 'none';
     renameEntry();
   } else if (ev.target.id === 'menu_star') {
-    ev.stopPropagation();
-    document.querySelector('.menu').style.display = 'none';
     starEntry();
   } else if (ev.target.id === 'menu_unstar'){
-    ev.stopPropagation();
-    document.querySelector('.menu').style.display = 'none';
     unstarEntry();
   } else if (ev.target.id === 'menu_remove') {
-    ev.stopPropagation();
-    document.querySelector('.menu').style.display = 'none';
     removeEntry();
   } else if (ev.target.id === 'menu_redirect'){
-    ev.stopPropagation();
-    document.querySelector('.menu').style.display = 'none';
     redirectEntry();
   } else if (ev.target.id === 'menu_get_share_url'){
-    ev.stopPropagation();
-    document.querySelector('.menu').style.display = 'none';
     getShareUrl();
   } else if (ev.target.id === 'menu_restore'){
-    ev.stopPropagation();
-    document.querySelector('.menu').style.display = 'none';
     restoreEntry();
   } else if (ev.target.id === 'menu_delete'){
-    ev.stopPropagation();
-    document.querySelector('.menu').style.display = 'none';
     deleteEntry();
   }
 }

@@ -152,6 +152,7 @@ def rename(username, path, name, af_name):
     from diskcloud.models.response import gen_error_res
     from diskcloud.models.mysql import update_execute, db_commit, db_rollback
 
+    af_name = generate_name(username, path, af_name, 0)
     if update_execute('update storage set name = %s where username = %s and path = %s and name = %s and trash_can = %s', (af_name, username, path, name, 0)):
         bf_path = Path(current_app.config['FILES_FOLDER'], 'user', username, path, name)
         af_path = Path(current_app.config['FILES_FOLDER'], 'user', username, path, af_name)
@@ -170,11 +171,12 @@ def moveto(username, bf_path, bf_name, af_path, af_name):
     from diskcloud.models.response import gen_error_res
     from diskcloud.models.mysql import update_execute, db_commit, db_rollback
 
-    path = Path(af_path, af_name).as_posix()
+    af_path = Path(af_path, af_name).as_posix()
+    af_name = generate_name(username, af_path, bf_name, 0)
 
-    if update_execute('update storage set path = %s where username = %s and path = %s and name = %s and trash_can = %s', (path, username, bf_path, bf_name, 0)):
+    if update_execute('update storage set path = %s, name = %s where username = %s and path = %s and name = %s and trash_can = %s', (af_path, af_name, username, bf_path, bf_name, 0)):
         bf_path = Path(current_app.config['FILES_FOLDER'], 'user', username, bf_path, bf_name)
-        af_path = Path(current_app.config['FILES_FOLDER'], 'user', username, af_path, af_name, bf_name)
+        af_path = Path(current_app.config['FILES_FOLDER'], 'user', username, af_path, af_name)
         try:
             bf_path.rename(af_path)
         except:
@@ -251,9 +253,11 @@ def create_file(username, path, name, filename):
     from diskcloud.models.time import now_time_str
     from diskcloud.models.mysql import insert_execute, db_commit, db_rollback
 
-    if insert_execute('insert into storage(username, path, name, size, modify_time, type) values(%s, %s, %s, %s, %s, %s)', (username, Path(path, name).as_posix(), filename, 0, now_time_str(), 0)):
+    path = Path(path, name).as_posix()
+    filename = generate_name(username, path, filename, 0)
+    if insert_execute('insert into storage(username, path, name, size, modify_time, type) values(%s, %s, %s, %s, %s, %s)', (username, path, filename, 0, now_time_str(), 0)):
         try:
-            path = Path(current_app.config['FILES_FOLDER'], 'user', username, path, name, filename).as_posix()
+            path = Path(current_app.config['FILES_FOLDER'], 'user', username, path, filename).as_posix()
             file = open(path,'a+')
             file.close()
         except:
@@ -273,8 +277,10 @@ def create_folder(username, path, name, foldername):
     from diskcloud.models.time import now_time_str
     from diskcloud.models.mysql import insert_execute, db_commit, db_rollback
 
-    if insert_execute('insert into storage(username, path, name, modify_time, type) values(%s, %s, %s, %s, %s)', (username, Path(path, name).as_posix(), foldername, now_time_str(), 1)):
-        path = Path(current_app.config['FILES_FOLDER'], 'user', username, path, name, foldername).as_posix()
+    path = Path(path, name).as_posix()
+    foldername = generate_name(username, path, foldername, 0)
+    if insert_execute('insert into storage(username, path, name, modify_time, type) values(%s, %s, %s, %s, %s)', (username, path, foldername, now_time_str(), 1)):
+        path = Path(current_app.config['FILES_FOLDER'], 'user', username, path, foldername).as_posix()
         try:
             mkdir(path)
         except:
@@ -293,13 +299,15 @@ def save_file(username, path, name, file):
     from diskcloud.models.time import now_time_str
     from diskcloud.models.mysql import insert_execute, db_commit, db_rollback
 
-    whole_path = Path(current_app.config['FILES_FOLDER'], 'user', username, path, name, file.filename)
+    path = Path(path, name).as_posix()
+    filename = generate_name(username, path, file.filename, 0)
+    whole_path = Path(current_app.config['FILES_FOLDER'], 'user', username, path, filename)
     whole_path_str = whole_path.as_posix()
     try:
         file.save(whole_path_str)
     except:
         return gen_error_res('fail to save uploaded file', 500)
-    if insert_execute('insert into storage(username, path, name, size, modify_time, type) values(%s, %s, %s, %s, %s, %s)', (username, Path(path, name).as_posix(), file.filename, whole_path.stat().st_size, now_time_str(), 0)):
+    if insert_execute('insert into storage(username, path, name, size, modify_time, type) values(%s, %s, %s, %s, %s, %s)', (username, path, filename, whole_path.stat().st_size, now_time_str(), 0)):
         db_commit()
         return True
     return gen_error_res('fail to insert data to datebase', 500)

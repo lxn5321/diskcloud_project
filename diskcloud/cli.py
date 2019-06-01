@@ -3,6 +3,8 @@ from flask.cli import with_appcontext
 
 def init_app(app):
     app.cli.add_command(init_db)
+    app.cli.add_command(add_user)
+    app.cli.add_command(remove_user)
 
 @click.command()
 @with_appcontext
@@ -10,6 +12,10 @@ def init_app(app):
 def init_db(force):
     import MySQLdb as sql
     from flask import current_app
+    from pathlib import Path
+    from shutil import rmtree
+    from os import mkdir
+    from time import sleep
 
     host = current_app.config['MYSQL_HOST']
     username = current_app.config['MYSQL_USERNAME']
@@ -17,26 +23,179 @@ def init_db(force):
     db = sql.connect(host,username,password,charset='utf8')
     c = db.cursor()
     c.execute('show databases')
-    arr = c.fetchall()
-    if not force:
-        for i in arr:
-            if i[0] == 'diskcloud':
-                c.close()
-                db.close()
-                click.echo("the diskcloud database already exist,if you want to delete it,please enter:flask init_db --force")
-                return False
-    try:
-        c.execute('drop database diskcloud')
-    except Exception as e:
-        if(e.args[0] == 1008):
+    result = c.fetchall()
+    is_exist = False
+    for i in range(len(result)):
+        if result[i][0] == 'diskcloud':
+            is_exist = True
+            break
+    if is_exist and not force:
+        c.close()
+        db.close()
+        click.echo("the diskcloud database already exist,if you want to delete it,please enter:flask init_db --force.")
+        return False
+    elif is_exist and force:
+        user_path = Path(current_app.config['FILES_FOLDER'], 'user').as_posix()
+        trash_can_path = Path(current_app.config['FILES_FOLDER'], 'trash_can').as_posix()
+        tar_path = Path(current_app.config['FILES_FOLDER'], 'tar').as_posix()
+        try:
+            rmtree(user_path)
+            rmtree(trash_can_path)
+            rmtree(tar_path)
+        except FileNotFoundError:
             pass
-        else:
-            raise e
-    c.execute('create database diskcloud')
-    c.execute('use diskcloud')
-    c.execute('CREATE TABLE `user` (`username` VARCHAR(32) NOT NULL,`password` CHAR(64) NOT NULL,`cookie_id` CHAR(64) NULL DEFAULT NULL,PRIMARY KEY (`username`)) COLLATE="utf8_general_ci" ENGINE=InnoDB')
-    c.execute('CREATE TABLE `share` (`sid` CHAR(8) NOT NULL,`username` VARCHAR(32) NOT NULL,`path` VARCHAR(1350) NOT NULL,`expire_time` CHAR(12) NOT NULL,PRIMARY KEY (`sid`),INDEX `FK_share_user` (`username`),CONSTRAINT `FK_share_user` FOREIGN KEY (`username`) REFERENCES `user` (`username`)) COLLATE="utf8_general_ci" ENGINE=InnoDB')
+        except:
+            raise
+        sleep(0.5)
+        try:
+            mkdir(user_path)
+            mkdir(trash_can_path)
+            mkdir(tar_path)
+        except:
+            raise
+
+        try:
+            c.execute('drop database diskcloud')
+        except:
+            c.close()
+            db.close()
+            raise
+    try:
+        c.execute('create database diskcloud')
+        c.execute('use diskcloud')
+        c.execute(
+              'CREATE TABLE `user` ('
+    	    + '`username` VARCHAR(32) NOT NULL,'
+    	    + '`password` CHAR(64) NOT NULL,'
+    	    + '`cookie_id` CHAR(64) NULL DEFAULT NULL,'
+    	    + 'PRIMARY KEY (`username`))'
+            + 'COLLATE="utf8_general_ci"'
+            + 'ENGINE=InnoDB;'
+        )
+        c.execute(
+              'CREATE TABLE `storage` ('
+            + '`username` VARCHAR(32) NOT NULL,'
+        	+ '`path` VARCHAR(3500) NOT NULL,'
+        	+ '`name` VARCHAR(255) NOT NULL,'
+        	+ '`size` CHAR(12) NULL DEFAULT NULL,'
+        	+ '`type` TINYINT(1) UNSIGNED NOT NULL,'
+        	+ '`star` TINYINT(1) UNSIGNED NOT NULL DEFAULT "0",'
+        	+ '`trash_can` TINYINT(1) UNSIGNED NOT NULL DEFAULT "0",'
+        	+ '`share` TINYINT(1) UNSIGNED NOT NULL DEFAULT "0",'
+        	+ '`sid` CHAR(8) NULL DEFAULT NULL,'
+        	+ '`modify_time` CHAR(12) NOT NULL,'
+        	+ '`star_time` CHAR(12) NULL DEFAULT NULL,'
+        	+ '`share_time` CHAR(12) NULL DEFAULT NULL,'
+        	+ '`expire_time` CHAR(12) NULL DEFAULT NULL,'
+        	+ '`trash_can_time` CHAR(12) NULL DEFAULT NULL,'
+        	+ 'PRIMARY KEY (`username`, `path`(500), `name`, `trash_can`),'
+        	+ 'CONSTRAINT `FK_storage_user` FOREIGN KEY (`username`) REFERENCES `user`' + '(`username`))'
+            + 'COLLATE="utf8_general_ci"'
+            + 'ENGINE=InnoDB;'
+        )
+    except Exception as e:
+        c.close()
+        db.close()
+        raise e
     c.close()
     db.close()
     click.echo("init db success!")
     return True
+
+@click.command()
+@with_appcontext
+@click.option('--username', required=True, prompt='username', help='username')
+@click.option('--password', required=True, prompt='password', hide_input=True, confirmation_prompt=True, help='password')
+@click.option('--force', is_flag=True, default=False, help='if user already exists,delete it.')
+def add_user(username, password, force):
+    from diskcloud.models.mysql import select_execute, update_execute, insert_execute, delete_execute, db_commit, db_rollback
+    from diskcloud.models.string import hash_sha3
+    from diskcloud.models.valid import valid_username, valid_password
+    from shutil import rmtree
+    from os import mkdir
+    from pathlib import Path
+    from flask import current_app
+    from time import sleep
+
+    if not valid_username(username):
+        click.echo("invalid username!")
+        return False
+    elif not valid_password(password):
+        click.echo("invalid password!")
+        return False
+    password = hash_sha3(password)
+    user_path = Path(current_app.config['FILES_FOLDER'], 'user', username).as_posix()
+    trash_can_path = Path(current_app.config['FILES_FOLDER'], 'trash_can', username).as_posix()
+    tar_path = Path(current_app.config['FILES_FOLDER'], 'tar', username).as_posix()
+    result = select_execute('select password from user where username = %s', (username,))
+    if len(result) != 0:
+        if not force:
+            click.echo("the username already exist,if you want to delete it,please add '--force' to enforce.")
+            return False
+        else:
+            try:
+                rmtree(user_path)
+                rmtree(trash_can_path)
+                rmtree(tar_path)
+                sleep(0.5)
+                mkdir(user_path)
+                mkdir(trash_can_path)
+                mkdir(tar_path)
+            except:
+                raise
+            delete_execute('delete from storage where username = %s', (username,))
+            result = update_execute('update user set password = %s where username = %s', (password, username))
+    else:
+        try:
+            mkdir(user_path)
+            mkdir(trash_can_path)
+            mkdir(tar_path)
+        except:
+            raise;
+        result = insert_execute('insert into user(username, password) values(%s, %s)', (username, password))
+    if result:
+        db_commit()
+        click.echo("create user success!");
+        return True
+    db_rollback()
+    click.echo("create user fail!")
+    return False
+
+@click.command()
+@with_appcontext
+@click.option('--username', required=True, prompt='username', help='username')
+def remove_user(username):
+    from diskcloud.models.mysql import select_execute, delete_execute, db_commit, db_rollback
+    from diskcloud.models.valid import valid_username
+    from shutil import rmtree
+    from pathlib import Path
+    from flask import current_app
+
+    if not valid_username(username):
+        click.echo("invalid username!")
+        return False
+    user_path = Path(current_app.config['FILES_FOLDER'], 'user', username).as_posix()
+    trash_can_path = Path(current_app.config['FILES_FOLDER'], 'trash_can', username).as_posix()
+    tar_path = Path(current_app.config['FILES_FOLDER'], 'tar', username).as_posix()
+    result = select_execute('select password from user where username = %s', (username,))
+    if len(result) != 0:
+        try:
+            rmtree(user_path)
+            rmtree(trash_can_path)
+            rmtree(tar_path)
+        except FileNotFoundError:
+            pass
+        except:
+            raise
+        delete_execute('delete from storage where username = %s', (username,))
+        result = delete_execute('delete from user where username = %s', (username,))
+    else:
+        click.echo("this user is not exist!")
+        return False
+    if result:
+        db_commit()
+        click.echo("remove user success!")
+        return True
+    db_rollback()
+    click.echo("remove user fail!")
+    return False

@@ -23,7 +23,7 @@ def update_execute(statement, tuple):
     db = _get_db()
     c = db.cursor()
     value = c.execute(statement, tuple)
-    if value == 1:
+    if value != 0:
         result = True
     else:
         result = False
