@@ -343,32 +343,47 @@ def trash_can(username, path, name, is_file):
     from flask import current_app
     from shutil import move
 
-    def walk(username, path, af_path):
-        result = select_execute('select name, type from storage where username = %s and path = %s and trash_can = %s', (username, path, 0))
+    def walk(username, bf_path, af_path):
+        result = select_execute('select name, type from storage where username = %s and path = %s and trash_can = %s', (username, bf_path.as_posix(), 0))
         update_result = True
         for i in range(len(result)):
-            update_result = update_result and update_execute('update storage set path = %s, trash_can = %s, trash_can_time = %s where username = %s and path = %s and name = %s and trash_can = %s', (af_path, 1, now_time_str(), username, path, result[i][0], 0))
+            af_name = generate_name(username, af_path.as_posix(), result[i][0], 1)
+            folder_path = Path(current_app.config['FILES_FOLDER'], 'user', username, bf_path)
+            update_result = update_result and update_execute('update storage set path = %s, name = %s, trash_can = %s, trash_can_time = %s where username = %s and path = %s and name = %s and trash_can = %s', (af_path.as_posix(), af_name, 1, now_time_str(), username, bf_path.as_posix(), result[i][0], 0))
+            if af_name != result[i][0]:
+                Path(folder_path, result[i][0]).rename(Path(folder_path, af_name))
             if result[i][1] == 1:
-                update_result = update_result and walk(username, Path(path, result[i][0]).as_posix(), Path(af_path, result[i][0]).as_posix())
+                update_result = update_result and walk(username, Path(bf_path, result[i][0]), Path(af_path, af_name))
         return update_result
 
     af_name = generate_name(username, path, name, 1)
+    bf_path = Path(current_app.config['FILES_FOLDER'], 'user', username, path, name)
+    af_path = Path(current_app.config['FILES_FOLDER'], 'trash_can', username, path, af_name)
     result = update_execute('update storage set name = %s, trash_can = %s, trash_can_time = %s where username = %s and path = %s and name = %s and trash_can = %s', (af_name, 1, now_time_str(), username, path, name, 0))
 
-    if not is_file:
-        result = result and walk(username, Path(path, name).as_posix(), Path(path, af_name).as_posix())
+    try:
+        if is_file:
+            af_path.parent.mkdir(parents = True, exist_ok = True)
+            move(bf_path.as_posix(), af_path.as_posix())
+        else:
+            result = result and walk(username, Path(path, name), Path(path, af_name))
+
+            if af_path.is_dir():
+                for child in bf_path.iterdir():
+                    move(child.as_posix(), af_path.as_posix())
+                bf_path.rmdir()
+            elif not af_path.exists():
+                move(bf_path.as_posix(), af_path.as_posix())
+    except:
+        db_rollback()
+        return gen_error_res('fail to move', 500)
+
     if result:
-        bf_path = Path(current_app.config['FILES_FOLDER'], 'user', username, path, name).as_posix()
-        af_path = Path(current_app.config['FILES_FOLDER'], 'trash_can', username, path, af_name).as_posix()
-        try:
-            move(bf_path, af_path)
-        except:
-            db_rollback()
-            return gen_error_res('fail to move', 500)
         db_commit()
         return ('', 200)
-    db_rollback()
-    return gen_error_res('fail to update datebase', 500)
+    else:
+        db_rollback()
+        return gen_error_res('fail to update datebase', 500)
 
 def untrash_can(username, path, name, is_file):
     from diskcloud.models.mysql import select_execute, update_execute, db_commit, db_rollback
