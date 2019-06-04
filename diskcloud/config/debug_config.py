@@ -8,7 +8,6 @@ MYSQL_PASSWORD = 'smahivan2626'
 # NGINX_X_ACCEL_REDIRECT = '/diskcloud/protected_files/'
 FILES_FOLDER = 'files'
 SESSION_COOKIE_DOMAIN = 'diskcloud.ga'
-SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_PATH = '/diskcloud/'
 SESSION_COOKIE_SECURE = False

@@ -198,7 +198,7 @@
 			</div>
 		</div>
 	</div>
-	<input type="file" id="fileElem" multiple  onchange="uploadFiles(this.files)">
+	<input type="file" id="fileElem" multiple  oninput="uploadFiles(this.files)">
 	<script>
 		var PARADICT = {};
 		PARADICT["username"] = "{{username}}";
