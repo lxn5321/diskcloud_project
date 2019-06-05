@@ -1,6 +1,6 @@
 from flask import request,views
-from diskcloud.models.valid import valid_url_path
-from diskcloud.models.response import gen_error_res
+from diskcloud.libs.valid import valid_url_path
+from diskcloud.libs.response import gen_error_res
 
 class FileApi(views.MethodView):
     # route request method
@@ -52,8 +52,8 @@ class FileApi(views.MethodView):
     # Main Processer
     # path = username/path
     def Info(self, path):
-        from diskcloud.models.file import get_folder_content
-        from diskcloud.models.response import gen_json_res
+        from diskcloud.libs.file import get_folder_content
+        from diskcloud.libs.response import gen_json_res
 
         result = valid_url_path(path, True)
         if isinstance(result, dict):
@@ -65,8 +65,8 @@ class FileApi(views.MethodView):
         return result
 
     def WholeFolderInfo(self, path):
-        from diskcloud.models.file import get_whole_folder_info
-        from diskcloud.models.response import gen_json_res
+        from diskcloud.libs.file import get_whole_folder_info
+        from diskcloud.libs.response import gen_json_res
 
         result = valid_url_path(path, True)
         if isinstance(result,dict):
@@ -78,8 +78,8 @@ class FileApi(views.MethodView):
         return result
 
     def StarInfo(self, path):
-        from diskcloud.models.file import get_star_info
-        from diskcloud.models.response import gen_json_res
+        from diskcloud.libs.file import get_star_info
+        from diskcloud.libs.response import gen_json_res
 
         result = valid_url_path(path, True)
         if isinstance(result, dict):
@@ -91,8 +91,8 @@ class FileApi(views.MethodView):
         return result
 
     def ShareInfo(self, path):
-        from diskcloud.models.file import get_share_info
-        from diskcloud.models.response import gen_json_res
+        from diskcloud.libs.file import get_share_info
+        from diskcloud.libs.response import gen_json_res
 
         result = valid_url_path(path, True)
         if isinstance(result, dict):
@@ -104,8 +104,8 @@ class FileApi(views.MethodView):
         return result
 
     def TrashCanInfo(self, path):
-        from diskcloud.models.file import get_trash_can_info
-        from diskcloud.models.response import gen_json_res
+        from diskcloud.libs.file import get_trash_can_info
+        from diskcloud.libs.response import gen_json_res
 
         result = valid_url_path(path, True)
         if isinstance(result, dict):
@@ -117,8 +117,8 @@ class FileApi(views.MethodView):
         return result
 
     def SearchInfo(self, path):
-        from diskcloud.models.file import get_search_info
-        from diskcloud.models.response import gen_json_res
+        from diskcloud.libs.file import get_search_info
+        from diskcloud.libs.response import gen_json_res
 
         search_text = request.args.get('search_text', None)
         if search_text is None:
@@ -133,8 +133,8 @@ class FileApi(views.MethodView):
         return result
 
     def ShareId(self, path):
-        from diskcloud.models.share import get_sid
-        from diskcloud.models.response import gen_json_res
+        from diskcloud.libs.share import get_sid
+        from diskcloud.libs.response import gen_json_res
 
         result = valid_url_path(path)
         if isinstance(result, dict):
@@ -144,12 +144,12 @@ class FileApi(views.MethodView):
         return result
 
     def Download(self, path):
-        from diskcloud.models.file import download
+        from diskcloud.libs.file import download
 
         return download(path)
 
     def Move(self, path):
-        from diskcloud.models.file import moveto
+        from diskcloud.libs.file import moveto
 
         bf_result = valid_url_path(path)
         if isinstance(bf_result,dict):
@@ -163,7 +163,7 @@ class FileApi(views.MethodView):
         return bf_result
 
     def Delete(self,path):
-        from diskcloud.models.file import delete
+        from diskcloud.libs.file import delete
 
         result = valid_url_path(path)
         if isinstance(result,dict):
@@ -171,8 +171,8 @@ class FileApi(views.MethodView):
         return result
 
     def CreateFile(self,path):
-        from diskcloud.models.file import create_file
-        from diskcloud.models.valid import valid_file_name
+        from diskcloud.libs.file import create_file
+        from diskcloud.libs.valid import valid_file_name
 
         name = request.args.get('name', None)
         if name is None:
@@ -187,8 +187,8 @@ class FileApi(views.MethodView):
         return result
 
     def CreateFolder(self,path):
-        from diskcloud.models.file import create_folder
-        from diskcloud.models.valid import valid_dir_name
+        from diskcloud.libs.file import create_folder
+        from diskcloud.libs.valid import valid_dir_name
 
         name = request.args.get('name', None)
         if name is None:
@@ -203,8 +203,8 @@ class FileApi(views.MethodView):
         return result
 
     def UploadFiles(self,path):
-        from diskcloud.models.file import save_file
-        from diskcloud.models.valid import valid_file_name
+        from diskcloud.libs.file import save_file
+        from diskcloud.libs.valid import valid_file_name
 
         result = valid_url_path(path, True)
         if isinstance(result,dict):
@@ -224,9 +224,9 @@ class FileApi(views.MethodView):
         return result
 
     def Rename(self,path):
-        from diskcloud.models.file import rename
-        from diskcloud.models.valid import valid_file_name,valid_dir_name
-        from diskcloud.models.response import gen_error_res
+        from diskcloud.libs.file import rename
+        from diskcloud.libs.valid import valid_file_name,valid_dir_name
+        from diskcloud.libs.response import gen_error_res
 
         result = valid_url_path(path)
         if isinstance(result,dict):
@@ -241,8 +241,8 @@ class FileApi(views.MethodView):
         return result
 
     def Share(self,path):
-        from diskcloud.models.share import generate_id
-        from diskcloud.models.response import gen_json_res
+        from diskcloud.libs.share import generate_id
+        from diskcloud.libs.response import gen_json_res
 
         result = valid_url_path(path)
         if isinstance(result,dict):
@@ -264,7 +264,7 @@ class FileApi(views.MethodView):
         return result
 
     def Unshare(self,path):
-        from diskcloud.models.share import unshare
+        from diskcloud.libs.share import unshare
 
         result = valid_url_path(path)
         if isinstance(result,dict):
@@ -272,7 +272,7 @@ class FileApi(views.MethodView):
         return result
 
     def Star(self, path):
-        from diskcloud.models.file import star
+        from diskcloud.libs.file import star
 
         result = valid_url_path(path)
         if isinstance(result,dict):
@@ -280,7 +280,7 @@ class FileApi(views.MethodView):
         return result
 
     def Unstar(self, path):
-        from diskcloud.models.file import unstar
+        from diskcloud.libs.file import unstar
 
         result = valid_url_path(path)
         if isinstance(result,dict):
@@ -288,7 +288,7 @@ class FileApi(views.MethodView):
         return result
 
     def Trashcan(self, path):
-        from diskcloud.models.file import trash_can
+        from diskcloud.libs.file import trash_can
 
         result = valid_url_path(path)
         if isinstance(result,dict):
@@ -296,7 +296,7 @@ class FileApi(views.MethodView):
         return result
 
     def Untrashcan(self, path):
-        from diskcloud.models.file import untrash_can
+        from diskcloud.libs.file import untrash_can
 
         result = valid_url_path(path)
         if isinstance(result,dict):

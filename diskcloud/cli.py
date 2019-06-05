@@ -110,9 +110,9 @@ def init_db(force):
 # @click.option('--email', required=True, prompt='password', hide_input=True, confirmation_prompt=True, help='password')
 # @click.option('--force', is_flag=True, default=False, help='if user already exists,delete it.')
 # def add_user(username, password, force):
-#     from diskcloud.models.mysql import select_execute, update_execute, insert_execute, delete_execute, db_commit, db_rollback
-#     from diskcloud.models.string import hash_sha3
-#     from diskcloud.models.valid import valid_username, valid_password
+#     from diskcloud.libs.mysql import select_execute, update_execute, insert_execute, delete_execute, db_commit, db_rollback
+#     from diskcloud.libs.string import hash_sha3
+#     from diskcloud.libs.valid import valid_username, valid_password
 #     from shutil import rmtree
 #     from os import mkdir
 #     from pathlib import Path
@@ -167,8 +167,8 @@ def init_db(force):
 @with_appcontext
 @click.option('--username', required=True, prompt='username', help='username')
 def remove_user(username):
-    from diskcloud.models.mysql import select_execute, delete_execute, db_commit, db_rollback
-    from diskcloud.models.valid import valid_username
+    from diskcloud.libs.mysql import select_execute, delete_execute, db_commit, db_rollback
+    from diskcloud.libs.valid import valid_username
     from shutil import rmtree
     from pathlib import Path
     from flask import current_app

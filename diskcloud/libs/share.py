@@ -1,7 +1,7 @@
 def generate_id(username, path, name, id_life):
-    from diskcloud.models.mysql import select_execute, update_execute, db_commit, db_rollback
-    from diskcloud.models.string import generate_random_str
-    from diskcloud.models.time import strftime, now_time, now_time_str
+    from diskcloud.libs.mysql import select_execute, update_execute, db_commit, db_rollback
+    from diskcloud.libs.string import generate_random_str
+    from diskcloud.libs.time import strftime, now_time, now_time_str
     from datetime import timedelta
     from pathlib import Path
 
@@ -41,8 +41,8 @@ def generate_id(username, path, name, id_life):
     return generate_id_return(False,'Fail to generate a share id')
 
 def get_sid(username, path, name):
-    from diskcloud.models.mysql import select_execute
-    from diskcloud.models.response import gen_error_res
+    from diskcloud.libs.mysql import select_execute
+    from diskcloud.libs.response import gen_error_res
     from pathlib import Path
 
     result = select_execute('select sid from storage where username = %s and path = %s and name = %s', (username, path, name));
@@ -59,8 +59,8 @@ def generate_id_return(succeed,value):
         return {'succeed': False, 'reason': value}
 
 def unshare(username, path, name):
-    from diskcloud.models.mysql import update_execute, db_commit, db_rollback
-    from diskcloud.models.response import gen_error_res
+    from diskcloud.libs.mysql import update_execute, db_commit, db_rollback
+    from diskcloud.libs.response import gen_error_res
 
     result = update_execute('update storage set share = %s, share_time = %s, expire_time = %s, sid = %s where username = %s and path = %s and name = %s', (0, None, None, None, username, path, name))
     if result:
@@ -70,8 +70,8 @@ def unshare(username, path, name):
     return gen_error_res('fail to update datebase', 500)
 
 def valid_sid(sid):
-    from diskcloud.models.valid import re_match
-    from diskcloud.models.mysql import select_execute
+    from diskcloud.libs.valid import re_match
+    from diskcloud.libs.mysql import select_execute
 
     if re_match('[a-zA-Z0-9]{8}',sid):
         result = select_execute('select expire_time,username,path,name from storage where sid = %s',(sid,))
@@ -81,7 +81,7 @@ def valid_sid(sid):
     return False
 
 def valid_expire_time(expire_time_str):
-    from diskcloud.models.time import now_time, strptime
+    from diskcloud.libs.time import now_time, strptime
 
     if expire_time_str == 'permanent':
         return 'permanent'

@@ -1,5 +1,5 @@
 from flask import request,views,current_app
-from diskcloud.models.response import gen_error_res
+from diskcloud.libs.response import gen_error_res
 
 class UserApi(views.MethodView):
     def post(self):
@@ -9,12 +9,12 @@ class UserApi(views.MethodView):
             return self.Register()
 
     def Login(self):
-        from diskcloud.models.string import hash_sha3
-        from diskcloud.models.valid import valid_user
-        from diskcloud.models.response import gen_json_res
-        from diskcloud.models.cookie import set_cookie_id
-        from diskcloud.models.session import create_session
-        
+        from diskcloud.libs.string import hash_sha3
+        from diskcloud.libs.valid import valid_user
+        from diskcloud.libs.response import gen_json_res
+        from diskcloud.libs.cookie import set_cookie_id
+        from diskcloud.libs.session import create_session
+
         username  = request.json.get('username')
         password = request.json.get('password')
         pw_hashed = hash_sha3(password)
@@ -33,9 +33,9 @@ class UserApi(views.MethodView):
     def Register(self):
         from os import mkdir
         from pathlib import Path
-        from diskcloud.models.string import hash_sha3
-        from diskcloud.models.session import create_session
-        from diskcloud.models.mysql import select_execute, insert_execute, db_commit, db_rollback
+        from diskcloud.libs.string import hash_sha3
+        from diskcloud.libs.session import create_session
+        from diskcloud.libs.mysql import select_execute, insert_execute, db_commit, db_rollback
 
         username  = request.json.get('username')
         password = request.json.get('password')

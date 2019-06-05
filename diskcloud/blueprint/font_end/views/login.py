@@ -1,8 +1,8 @@
 from flask import request,redirect,render_template,url_for,make_response,current_app
-from diskcloud.models.session import create_session,get_value_session,delete_session
-from diskcloud.models.valid import valid_user
-from diskcloud.models.string import hash_sha3
-from diskcloud.models.cookie import get_username_cookie,set_cookie_id
+from diskcloud.libs.session import create_session,get_value_session,delete_session
+from diskcloud.libs.valid import valid_user
+from diskcloud.libs.string import hash_sha3
+from diskcloud.libs.cookie import get_username_cookie,set_cookie_id
 
 def Login():
     if request.args.get('logout'):

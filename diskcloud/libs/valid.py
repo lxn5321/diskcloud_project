@@ -14,7 +14,7 @@ def valid_password(password):
     return re_match('^[a-zA-Z0-9_!@#$%,\+\-\^\.]{8,32}$',password)
 
 def valid_user(username,pw_hashed):
-    from diskcloud.models.mysql import select_execute
+    from diskcloud.libs.mysql import select_execute
 
     if len(username) > 32:
         return False
@@ -37,9 +37,9 @@ def valid_dir_name(name):
 
 def valid_url_path(url_path, root_ok=False):
     from pathlib import Path
-    from diskcloud.models.session import valid_session
-    from diskcloud.models.response import gen_error_res
-    from diskcloud.models.mysql import select_execute
+    from diskcloud.libs.session import valid_session
+    from diskcloud.libs.response import gen_error_res
+    from diskcloud.libs.mysql import select_execute
 
     url_path = url_path.strip().replace('..','').replace('~','')
     if url_path.endswith('/'):
