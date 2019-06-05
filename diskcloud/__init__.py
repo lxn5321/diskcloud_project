@@ -22,10 +22,9 @@ def create_app(debug=False):
 
     # add url route
     # from .views.settings import Settings
-    from .views.about import About
+    # from .views.about import About
     # app.add_url_rule('/settings','settings',Settings)
-
-    app.add_url_rule('/about','about',About)
+    # app.add_url_rule('/about','about',About)
 
     # add custom command
     import diskcloud.cli

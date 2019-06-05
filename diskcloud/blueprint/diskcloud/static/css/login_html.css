@@ -30,10 +30,11 @@ body{
 .title{
   display: flex;
   align-items: center;
-  margin-bottom: 32px;
+  margin-bottom: 30px;
+  margin-left: -8px;
 }
 .title-text{
-  font-size: 32px;
+  font-size: 30px;
 }
 .icon{
   margin-right: 5px;
@@ -51,13 +52,11 @@ body{
   background-color: #007bff;
 }
 .toggle-switch{
-  animation-duration: 0.6s;
-  animation-timing-function: ease;
+  animation-duration: 0.5s;
   animation-name: toggleSwitch;
 }
 .toggle-switch-reverse{
-  animation-duration: 0.6s;
-  animation-timing-function: ease;
+  animation-duration: 0.5s;
   animation-name: toggleSwitchReverse;
 }
 .toggle-text{
@@ -81,7 +80,6 @@ body{
   align-items:center;
   max-width: 300px;
   margin: auto;
-  margin-top: 200px;
 }
 .main-container .form-control {
   position: relative;
@@ -135,6 +133,27 @@ body{
 }
 .footer p{
     margin-bottom: 0;
+}
+
+@media screen and (min-height: 400px){
+  .main-container{
+    margin-top: 60px;
+  }
+}
+@media screen and (min-height: 600px){
+  .main-container{
+    margin-top: 110px;
+  }
+}
+@media screen and (min-height: 800px){
+  .main-container{
+    margin-top: 160px;
+  }
+}
+@media screen and (min-height: 1000px){
+  .main-container{
+    margin-top: 220px;
+  }
 }
 
 @keyframes toggleSwitch{

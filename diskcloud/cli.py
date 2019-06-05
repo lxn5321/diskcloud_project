@@ -68,6 +68,7 @@ def init_db(force):
     	    + '`username` VARCHAR(32) NOT NULL,'
     	    + '`password` CHAR(64) NOT NULL,'
     	    + '`cookie_id` CHAR(64) NULL DEFAULT NULL,'
+            + '`email` VARCHAR(255) NOT NULL,'
     	    + 'PRIMARY KEY (`username`))'
             + 'COLLATE="utf8_general_ci"'
             + 'ENGINE=InnoDB;'
