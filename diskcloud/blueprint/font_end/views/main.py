@@ -12,7 +12,7 @@ def Main(username):
             create_session('username',username)
             return render_template('main.html',username = username)
         else:
-            response = redirect(url_for('DiskCloud.Login'))
+            response = redirect(url_for('FontEnd.Login'))
             response.delete_cookie('login_id')
             return response
-    return redirect(url_for('DiskCloud.Login'))
+    return redirect(url_for('FontEnd.Login'))

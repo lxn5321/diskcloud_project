@@ -14,11 +14,11 @@ def create_app(debug=False):
         app.config.from_pyfile('config/config.py',silent=True)
 
     # add blueprint
-    from .blueprint.api.bp import api_bp
-    from .blueprint.diskcloud.bp import diskcloud_bp
+    from .blueprint.font_end.bp import font_end
+    from .blueprint.back_end.bp import back_end
 
-    app.register_blueprint(diskcloud_bp, url_prefix='/diskcloud/')
-    app.register_blueprint(api_bp, url_prefix='/diskcloud/api/')
+    app.register_blueprint(font_end, url_prefix='/diskcloud/')
+    app.register_blueprint(back_end, url_prefix='/diskcloud/api/')
 
     # add url route
     # from .views.settings import Settings
