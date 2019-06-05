@@ -36,12 +36,12 @@ function toggleSwitch(ev){
 }
 
 function wholeClickHanlder(ev){
-  $('#login_input_username').popover('hide');
-  $('#login_input_password').popover('hide');
-  $('#reg_input_username').popover('hide');
-  $('#reg_input_password').popover('hide');
-  $('#reg_input_password_confirm').popover('hide');
-  $('#reg_input_email').popover('hide');
+  $('#login_input_username').popover('dispose');
+  $('#login_input_password').popover('dispose');
+  $('#reg_input_username').popover('dispose');
+  $('#reg_input_password').popover('dispose');
+  $('#reg_input_password_confirm').popover('dispose');
+  $('#reg_input_email').popover('dispose');
   $('.alert').alert('close');
 }
 
@@ -52,9 +52,17 @@ function loginClickHanlder(ev){
   let password_input = $('#login_input_password');
   let checkbox_value = document.querySelector('#checkbox_cookie').checked?'true':'false';
 
-  if(validUsername(username_input.val()) === false){
+  if(username_input.val() === ''){
+    username_input.attr('data-content', '请输入用户名');
     username_input.popover('show');
+  }else if(validUsername(username_input.val()) === false){
+    username_input.attr('data-content', '用户名不合法');
+    username_input.popover('show');
+  }else if(password_input.val() === ''){
+    password_input.attr('data-content', '请输入密码');
+    password_input.popover('show');
   }else if(validPassword(password_input.val()) === false){
+    password_input.attr('data-content', '密码不合法');
     password_input.popover('show');
   }else{
     fetch(PARADICT["user_api_url"] + '?login=1', {
@@ -83,6 +91,8 @@ function loginClickHanlder(ev){
         window.location.replace(PARADICT["main_html_url"] + username_input.val() + '/');
       }else{
         response.json().then(data => {
+          username_input.val('');
+          password_input.val('');
           $('.alert-container').html('<div class="alert alert-danger fade show" role="alert">登录失败<br>' + data.err_mes + '</div>')
           $('.alert').alert();
         })
@@ -98,13 +108,29 @@ function registerClickHandler(ev){
   let password_confirm_input = $('#reg_input_password_confirm');
   let email_input = $('#reg_input_email');
 
-  if(validUsername(username_input.val()) === false){
+  if(username_input.val() === ''){
+    username_input.attr('data-content', '请输入用户名');
     username_input.popover('show');
-  }else if(validPassword(password_input.val()) === false){
+  }else if(validUsername(username_input.val()) === false){
+    username_input.attr('data-content', '用户名不合法');
+    username_input.popover('show');
+  }else if(password_input.val() === ''){
+    password_input.attr('data-content', '请输入密码');
     password_input.popover('show');
-  }else if(password_input.val() !== password_confirm_input.val()){
+  }else if(validPassword(password_input.val()) === false){
+    password_input.attr('data-content', '密码不合法');
+    password_input.popover('show');
+  }else if(password_confirm_input.val() === ''){
+    password_confirm_input.attr('data-content', '请输入确认密码');
     password_confirm_input.popover('show');
+  }else if(password_input.val() !== password_confirm_input.val()){
+    password_confirm_input.attr('data-content', '密码不相同');
+    password_confirm_input.popover('show');
+  }else if(email_input.val() === ''){
+    email_input.attr('data-content', '请输入email');
+    email_input.popover('show');
   }else if(validEmail(email_input.val()) === false){
+    email_input.attr('data-content', 'email不合法');
     email_input.popover('show');
   }else{
     fetch(PARADICT["user_api_url"] + '?register=1', {
@@ -128,6 +154,10 @@ function registerClickHandler(ev){
                 }, 1000 )
       }else{
         response.json().then(data => {
+          username_input.val('');
+          password_input.val('');
+          password_confirm_input.val('');
+          email_input.val('');
           $('.alert-container').html('<div class="alert alert-danger fade show" role="alert">注册失败<br>' + data.err_mes + '</div>')
           $('.alert').alert();
         })
@@ -150,4 +180,5 @@ function validEmail(email){
   let re = /^([A-Za-z0-9_\-\.\u4e00-\u9fa5])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,8})$/;
   return re.test(email);
 }
+
 init_all()

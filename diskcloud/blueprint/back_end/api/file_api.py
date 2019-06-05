@@ -157,7 +157,7 @@ class FileApi(views.MethodView):
             af_result = valid_url_path(af_path,root_ok=True)
             if isinstance(af_result,dict):
                 if af_result['is_file'] is False:
-                    return moveto(bf_result['username'], bf_result['path'], bf_result['name'], af_result['path'], af_result['name'])
+                    return moveto(bf_result['username'], bf_result['path'], bf_result['name'], af_result['path'], af_result['name'], bf_result['is_file'])
                 return gen_error_res("af_path must be a dir",400)
             return af_result
         return bf_result
@@ -237,7 +237,7 @@ class FileApi(views.MethodView):
             else:
                 if not valid_dir_name(af_name):
                     return gen_error_res('invalid dir name', 400)
-            return rename(result['username'], result['path'], result['name'], af_name)
+            return rename(result['username'], result['path'], result['name'], af_name, result['is_file'])
         return result
 
     def Share(self,path):

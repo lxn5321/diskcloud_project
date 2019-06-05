@@ -133,6 +133,11 @@ body {
   background-color: rgb(232, 240, 254);
 }
 
+.media{
+  display: flex;
+  align-items: center;
+}
+
 .small_folder_button,
 .small_folder_icon,
 .small_folder_blank {

@@ -17,6 +17,13 @@ def init_db(force):
     from os import mkdir
     from time import sleep
 
+    def empty(path):
+        for i in path.iterdir():
+            if i.is_file():
+                i.unlink()
+            elif i.is_dir():
+                rmtree(i)
+
     host = current_app.config['MYSQL_HOST']
     username = current_app.config['MYSQL_USERNAME']
     password = current_app.config['MYSQL_PASSWORD']
@@ -32,29 +39,16 @@ def init_db(force):
     if is_exist and not force:
         c.close()
         db.close()
-        click.echo("the diskcloud database already exist,if you want to delete it,please enter:flask init_db --force.")
+        click.echo("the diskcloud database already exist,if you want to delete it\nplease enter:flask init_db --force.")
         return False
     elif is_exist and force:
-        user_path = Path(current_app.config['FILES_FOLDER'], 'user').as_posix()
-        trash_can_path = Path(current_app.config['FILES_FOLDER'], 'trash_can').as_posix()
-        tar_path = Path(current_app.config['FILES_FOLDER'], 'tar').as_posix()
+        user_path = Path(current_app.config['FILES_FOLDER'], 'user')
+        trash_can_path = Path(current_app.config['FILES_FOLDER'], 'trash_can')
+        tar_path = Path(current_app.config['FILES_FOLDER'], 'tar')
         try:
-            rmtree(user_path)
-            rmtree(trash_can_path)
-            rmtree(tar_path)
-        except FileNotFoundError:
-            pass
-        except:
-            raise
-        sleep(0.5)
-        try:
-            mkdir(user_path)
-            mkdir(trash_can_path)
-            mkdir(tar_path)
-        except:
-            raise
-
-        try:
+            empty(user_path)
+            empty(trash_can_path)
+            empty(tar_path)
             c.execute('drop database diskcloud')
         except:
             c.close()

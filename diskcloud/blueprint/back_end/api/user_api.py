@@ -37,31 +37,33 @@ class UserApi(views.MethodView):
         from diskcloud.libs.session import create_session
         from diskcloud.libs.mysql import select_execute, insert_execute, db_commit, db_rollback
 
-        username  = request.json.get('username')
-        password = request.json.get('password')
-        email = request.json.get('email')
-        pw_hashed = hash_sha3(password)
+        if current_app.config['CAN_REGISTER']:
+            username  = request.json.get('username')
+            password = request.json.get('password')
+            email = request.json.get('email')
+            pw_hashed = hash_sha3(password)
 
-        result = select_execute('select password from user where username = %s', (username,))
-        if len(result) == 0:
-            result = select_execute('select password from user where email = %s', (email,))
+            result = select_execute('select password from user where username = %s', (username,))
             if len(result) == 0:
-                result = insert_execute('insert into user(username, password, email) values(%s, %s, %s)', (username, pw_hashed, email))
-                if result:
-                    user_path = Path(current_app.config['FILES_FOLDER'], 'user', username).as_posix()
-                    trash_can_path = Path(current_app.config['FILES_FOLDER'], 'trash_can', username).as_posix()
-                    tar_path = Path(current_app.config['FILES_FOLDER'], 'tar', username).as_posix()
-                    try:
-                        mkdir(user_path)
-                        mkdir(trash_can_path)
-                        mkdir(tar_path)
-                    except:
-                        raise
-                    db_commit()
-                    create_session('username',username)
-                    return ('', 200)
-                else:
-                    db_rollback()
-                    return gen_error_res('数据库插入数据失败', 500)
-            return gen_error_res('该email已被使用', 403)
-        return gen_error_res('该用户名已被使用', 403)
+                result = select_execute('select password from user where email = %s', (email,))
+                if len(result) == 0:
+                    result = insert_execute('insert into user(username, password, email) values(%s, %s, %s)', (username, pw_hashed, email))
+                    if result:
+                        user_path = Path(current_app.config['FILES_FOLDER'], 'user', username).as_posix()
+                        trash_can_path = Path(current_app.config['FILES_FOLDER'], 'trash_can', username).as_posix()
+                        tar_path = Path(current_app.config['FILES_FOLDER'], 'tar', username).as_posix()
+                        try:
+                            mkdir(user_path)
+                            mkdir(trash_can_path)
+                            mkdir(tar_path)
+                        except:
+                            raise
+                        db_commit()
+                        create_session('username',username)
+                        return ('', 200)
+                    else:
+                        db_rollback()
+                        return gen_error_res('数据库插入数据失败', 500)
+                return gen_error_res('该email已被使用', 403)
+            return gen_error_res('该用户名已被使用', 403)
+        return gen_error_res('注册功能暂不开放', 403)

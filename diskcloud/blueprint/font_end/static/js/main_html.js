@@ -587,7 +587,7 @@ function showMenu(ev, mode) {
       htmlArray[12] = "<div class='menu_entry' id='menu_remove'>删除</div>";
     }else{
       htmlArray[13] = "<div class='menu_entry' id='menu_restore'>还原</div>";
-      htmlArray[14] = "<div class='menu_entry' id='menu_delete'>永久删除</div>";
+      htmlArray[14] = "<div class='menu_entry' id='menu_delete'>彻底删除</div>";
     }
   }else if(mode === 'blank'){
     htmlArray[15] = "<div class='menu_entry' id='menu_refresh'>刷新</div>";
@@ -1104,7 +1104,7 @@ function renameEntry() {
       re = /^[\w\u4e00-\u9fa5!@#$%,\+\-\^\(\)]{1}([ ]?[\w\u4e00-\u9fa5!@#$%,\+\-\^\(\)])*$/;
     }
     let have_same = have_same_file(after_name, JSONDATA);
-    if (re.test(name) && name.length <= 255 && !have_same) {
+    if (re.test(after_name) && after_name.length <= 255 && !have_same) {
       fetch(url, {
           credentials: "same-origin",
           method: "PATCH",
@@ -1447,6 +1447,7 @@ function uploadFiles(files) {
       })
   }
 
+  document.querySelector('#fileElem').value = '';
   modal.modal('show');
 }
 

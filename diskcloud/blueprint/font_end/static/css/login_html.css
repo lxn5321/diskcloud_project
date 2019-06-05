@@ -43,7 +43,7 @@ body{
 .toggle{
   display: flex;
   flex-direction: column;
-  margin-bottom: 12px;
+  margin-bottom: 18px;
 }
 .toggle-line{
   margin-left: 2px;
@@ -110,7 +110,7 @@ body{
   margin-bottom: -1px;
 }
 .checkbox{
-  margin-top: 4px;
+  margin-top: 8px;
 }
 .login-container,
 .register-container{
@@ -125,7 +125,7 @@ body{
   display: none;
 }
 #login-btn{
-    width: 80px;
+  width: 80px;
 }
 #register-btn{
   margin-top: 20px;
