@@ -56,6 +56,8 @@ class UserApi(views.MethodView):
                             mkdir(user_path)
                             mkdir(trash_can_path)
                             mkdir(tar_path)
+                        except FileExistsError:
+                            pass
                         except:
                             raise
                         db_commit()
