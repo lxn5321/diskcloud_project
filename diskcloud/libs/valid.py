@@ -35,7 +35,7 @@ def valid_dir_name(name):
         return re_match('^[\w!@#$%,\+\-\^\(\)]{1}([ ]?[\w!@#$%,\+\-\^\(\)])*$',name)
     return False
 
-def valid_url_path(url_path, root_ok=False):
+def valid_url_path(url_path, root_ok=False, trash_can=False):
     from pathlib import Path
     from diskcloud.libs.session import valid_session
     from diskcloud.libs.response import gen_error_res
@@ -43,15 +43,15 @@ def valid_url_path(url_path, root_ok=False):
 
     url_path = url_path.strip().replace('..','').replace('~','')
     if url_path.endswith('/'):
-        return gen_error_res('invalid path.',400)
+        return gen_error_res('无效的路径',400)
     if url_path.count('/') == 0:
         if root_ok == False:
-            return gen_error_res('invalid path,path cannot be root dir.',404)
+            return gen_error_res('无效的路径，该路径不得为根目录',404)
         username = url_path
         if valid_session('username', username):
             return {'username': username, 'path': '.', 'name': '.', 'is_file': False}
         else:
-            return gen_error_res('invalid session.',401)
+            return gen_error_res('无效的session',401)
     elif url_path.count('/') == 1:
         path = '.'
         username, name = url_path.split('/', maxsplit = 1)
@@ -59,12 +59,16 @@ def valid_url_path(url_path, root_ok=False):
         username, others = url_path.split('/', maxsplit = 1)
         path, name = others.rsplit('/', maxsplit = 1)
     if valid_session('username',username):
-        result = select_execute("select type from storage where username = %s and path = %s and name = %s", (username, path, name))
+        if trash_can == False:
+            trash_can = 0
+        elif trash_can == True:
+            trash_can = 1
+        result = select_execute("select type from storage where username = %s and path = %s and name = %s and trash_can = %s", (username, path, name, trash_can))
         if result[0][0] == 0:
             return {'username': username, 'path': path, 'name': name, 'is_file': True}
         elif result[0][0] == 1:
             return {'username': username, 'path': path, 'name': name, 'is_file': False}
         else:
-            return gen_error_res('invalid path.',404)
+            return gen_error_res('无效的路径',404)
     else:
-        return gen_error_res('invalid session.',401)
+        return gen_error_res('无效的session',401)

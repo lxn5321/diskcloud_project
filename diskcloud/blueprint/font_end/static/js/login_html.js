@@ -1,3 +1,5 @@
+"use strict"
+
 function init_all(){
   let toggleText = document.querySelectorAll('.toggle-text')
   toggleText[0].onclick = toggleSwitch;

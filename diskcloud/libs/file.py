@@ -153,10 +153,10 @@ def rename(username, path, name, af_name, is_file):
     from diskcloud.libs.mysql import select_execute, update_execute, db_commit, db_rollback
 
     def walk(username, path, af_path):
-        result = select_execute('select name, type from storage where username = %s and path = %s', (username, path))
+        result = select_execute('select name, type from storage where username = %s and path = %s and trash_can = %s', (username, path, 0))
         update_result = True
         for i in range(len(result)):
-            update_result = update_result and update_execute('update storage set path = %s where username = %s and path = %s and name = %s', (af_path, username, path, result[i][0]))
+            update_result = update_result and update_execute('update storage set path = %s where username = %s and path = %s and name = %s and trash_can = %s', (af_path, username, path, result[i][0], 0))
             if result[i][1] == 1:
                 update_result = update_result and walk(username, Path(path, result[i][0]).as_posix(), Path(af_path, result[i][0]).as_posix())
         return update_result
@@ -168,19 +168,14 @@ def rename(username, path, name, af_name, is_file):
     if result and update_execute('update storage set name = %s where username = %s and path = %s and name = %s and trash_can = %s', (af_name, username, path, name, 0)):
         bf_path = Path(current_app.config['FILES_FOLDER'], 'user', username, path, name)
         af_path = Path(current_app.config['FILES_FOLDER'], 'user', username, path, af_name)
-        trash_can_bf_path = Path(current_app.config['FILES_FOLDER'], 'trash_can', username, path, name)
-        trash_can_af_path = Path(current_app.config['FILES_FOLDER'], 'trash_can', username, path, af_name)
         try:
             bf_path.rename(af_path)
-            trash_can_bf_path.rename(trash_can_af_path)
-        except FileNotFoundError:
-            pass
         except:
             db_rollback()
-            return gen_error_res('fail to rename', 500)
+            return gen_error_res('重命名失败', 500)
         db_commit()
         return ('', 200)
-    return gen_error_res('fail to update datebase', 500)
+    return gen_error_res('更新数据库失败', 500)
 
 def moveto(username, bf_path, bf_name, af_path, af_name, is_file):
     from pathlib import Path
@@ -189,10 +184,10 @@ def moveto(username, bf_path, bf_name, af_path, af_name, is_file):
     from diskcloud.libs.mysql import update_execute, db_commit, db_rollback
 
     def walk(username, path, af_path):
-        result = select_execute('select name, type from storage where username = %s and path = %s', (username, path))
+        result = select_execute('select name, type from storage where username = %s and path = %s and trash_can = %s', (username, path, 0))
         update_result = True
         for i in range(len(result)):
-            update_result = update_result and update_execute('update storage set path = %s where username = %s and path = %s and name = %s', (af_path, username, path, result[i][0]))
+            update_result = update_result and update_execute('update storage set path = %s where username = %s and path = %s and name = %s and trash_can = %s', (af_path, username, path, result[i][0], 0))
             if result[i][1] == 1:
                 update_result = update_result and walk(username, Path(path, result[i][0]).as_posix(), Path(af_path, result[i][0]).as_posix())
         return update_result
@@ -205,20 +200,15 @@ def moveto(username, bf_path, bf_name, af_path, af_name, is_file):
     if result and update_execute('update storage set path = %s, name = %s where username = %s and path = %s and name = %s and trash_can = %s', (af_path, af_name, username, bf_path, bf_name, 0)):
         bf_path = Path(current_app.config['FILES_FOLDER'], 'user', username, bf_path, bf_name)
         af_path = Path(current_app.config['FILES_FOLDER'], 'user', username, af_path, af_name)
-        trash_can_bf_path = Path(current_app.config['FILES_FOLDER'], 'trash_can', username, bf_path, bf_name)
-        trash_can_af_path = Path(current_app.config['FILES_FOLDER'], 'trash_can', username, af_path, af_name)
         try:
             bf_path.rename(af_path)
-            trash_can_bf_path.rename(trash_can_af_path)
-        except FileNotFoundError:
-            pass
         except:
             db_rollback()
-            return gen_error_res('fail to move', 500)
+            return gen_error_res('移动失败', 500)
         db_commit()
         return ('', 200)
     else:
-        return gen_error_res('fail to update datebase', 500)
+        return gen_error_res('更新数据库失败', 500)
 
 def create_file(username, path, name, filename):
     from pathlib import Path
@@ -236,12 +226,12 @@ def create_file(username, path, name, filename):
             file.close()
         except:
             db_rollback()
-            return gen_error_res('fail to create file', 500)
+            return gen_error_res('创建文件失败', 500)
         db_commit()
         return ('',200)
     else:
         db_rollback()
-        return gen_error_res('fail to insert data to datebase', 500)
+        return gen_error_res('向数据库内插入数据失败', 500)
 
 def create_folder(username, path, name, foldername):
     from pathlib import Path
@@ -264,7 +254,7 @@ def create_folder(username, path, name, foldername):
         return ('',200)
     else:
         db_rollback()
-        return gen_error_res('fail to insert data to datebase', 500)
+        return gen_error_res('向数据库内插入数据失败', 500)
 
 def save_file(username, path, name, file):
     from pathlib import Path
@@ -280,11 +270,11 @@ def save_file(username, path, name, file):
     try:
         file.save(whole_path_str)
     except:
-        return gen_error_res('fail to save uploaded file', 500)
+        return gen_error_res('保存已上传的文件失败', 500)
     if insert_execute('insert into storage(username, path, name, size, modify_time, type) values(%s, %s, %s, %s, %s, %s)', (username, path, filename, whole_path.stat().st_size, now_time_str(), 0)):
         db_commit()
         return True
-    return gen_error_res('fail to insert data to datebase', 500)
+    return gen_error_res('向数据库内插入数据失败', 500)
 
 def star(username, path, name):
     from diskcloud.libs.mysql import update_execute, db_commit, db_rollback
@@ -296,7 +286,7 @@ def star(username, path, name):
         db_commit()
         return ('', 200)
     db_rollback()
-    return gen_error_res('fail to update datebase', 500)
+    return gen_error_res('更新数据库失败', 500)
 
 def unstar(username, path, name):
     from diskcloud.libs.mysql import update_execute, db_commit, db_rollback
@@ -307,7 +297,7 @@ def unstar(username, path, name):
         db_commit()
         return ('', 200)
     db_rollback()
-    return gen_error_res('fail to update datebase', 500)
+    return gen_error_res('更新数据库失败', 500)
 
 def trash_can(username, path, name, is_file):
     from diskcloud.libs.mysql import select_execute, update_execute, db_commit, db_rollback
@@ -350,14 +340,14 @@ def trash_can(username, path, name, is_file):
                 move(bf_path.as_posix(), af_path.as_posix())
     except:
         db_rollback()
-        return gen_error_res('fail to move', 500)
+        return gen_error_res('移动失败', 500)
 
     if result:
         db_commit()
         return ('', 200)
     else:
         db_rollback()
-        return gen_error_res('fail to update datebase', 500)
+        return gen_error_res('更新数据库失败', 500)
 
 def untrash_can(username, path, name, is_file):
     from diskcloud.libs.mysql import select_execute, update_execute, db_commit, db_rollback
@@ -397,11 +387,11 @@ def untrash_can(username, path, name, is_file):
                 bf_path.parent.rmdir()
         except:
             db_rollback()
-            return gen_error_res('fail to move', 500)
+            return gen_error_res('无法还原，原文件夹可能更名或移动了位置', 500)
         db_commit()
         return ('', 200)
     db_rollback()
-    return gen_error_res('fail to update datebase', 500)
+    return gen_error_res('更新数据库失败', 500)
 
 def delete(username, path, name, is_file):
     from pathlib import Path
@@ -451,11 +441,11 @@ def delete(username, path, name, is_file):
                         path.parent.rmdir()
                 except:
                     db_rollback()
-                    return gen_error_res('fail to delete',500)
+                    return gen_error_res('删除失败',500)
                 db_commit()
                 return ('', 200)
             else:
-                return gen_error_res('fail to update datebase', 500)
+                return gen_error_res('更新数据库失败', 500)
         else:
             if delete_folder_db(username, path, name):
                 path = Path(current_app.config['FILES_FOLDER'], 'trash_can', username, path, name).as_posix()
@@ -463,32 +453,82 @@ def delete(username, path, name, is_file):
                     rmtree(path)
                 except:
                     db_rollback()
-                    return gen_error_res('fail to delete',500)
+                    return gen_error_res('删除失败',500)
                 db_commit()
                 return ('', 200)
             else:
                 db_rollback()
-                return gen_error_res('fail to update datebase', 500)
-    return gen_error_res("can't delete,because this file/folder not in trash can.")
+                return gen_error_res('更新数据库失败', 500)
+    return gen_error_res("不能删除，因为该文件或文件夹不在回收站中")
+
+def empty_trash_can(username):
+    from diskcloud.libs.mysql import delete_execute, db_commit, db_rollback
+    from diskcloud.libs.response import gen_error_res
+    from pathlib import Path
+    from flask import current_app
+
+    def delete_file(path):
+        for i in path.iterdir():
+            if i.is_file():
+                i.unlink()
+            elif i.is_dir():
+                delete_file(i)
+    def delete_folder(path):
+        try:
+            next(path.iterdir())
+        except StopIteration:
+            path.rmdir()
+            return
+        for i in path.iterdir():
+            if i.is_dir():
+                delete_folder(i)
+        path.rmdir()
+    def empty(path):
+        delete_file(path)
+        delete_folder(path)
+        path.mkdir()
+
+    if delete_execute('delete from storage where username = %s and trash_can = %s', (username, 1)):
+        trash_can_path = Path(current_app.config['FILES_FOLDER'], 'trash_can', username)
+        try:
+            empty(trash_can_path)
+        except:
+            db_rollback()
+            return gen_error_res('清空回收站失败',500)
+        db_commit()
+        return ('', 200)
+    else:
+        db_rollback()
+        return gen_error_res('更新数据库失败', 500)
 
 def generate_name(username, path, name, trash_can):
     from diskcloud.libs.mysql import select_execute
     from re import escape
 
     def get_index(name):
-        name_stem = name.rsplit('.', maxsplit = 1)[0]
-        index1 = name_stem.rfind('(')
-        index2 = name_stem.rfind(')')
-        index = int(name_stem[index1 + 1: index2])
-        return index
+        if name.rfind(')') + 1 == name.rfind('.') or name.rfind(')') + 1== len(name):
+            name_stem = name.rsplit('.', maxsplit = 1)[0]
+            index1 = name_stem.rfind('(')
+            index2 = name_stem.rfind(')')
+            try:
+                index = int(name_stem[index1 + 1: index2])
+            except ValueError:
+                return False
+            return index
+        return False
 
-    name_stem =  name.rsplit('.', maxsplit = 1)[0]
+    if 1 <= get_index(name) < 10000:
+        name1 = name[0:name.rfind('(')] + name[name.rfind(')') + 1:]
+    else:
+        name1 = name
+
+    name_stem = name1.rsplit('.', maxsplit = 1)[0]
     try:
-        name_suffix = name.rsplit('.', maxsplit = 1)[1]
+        name_suffix = name1.rsplit('.', maxsplit = 1)[1]
     except IndexError:
         name_suffix = ''
     if name_suffix == '':
-        name_exp = '^' + escape(name) + '(\\([1-9]{1}[0-9]*\\))?$'
+        name_exp = '^' + escape(name1) + '(\\([1-9]{1}[0-9]*\\))?$'
     else:
         name_exp = '^' + escape(name_stem) + '(\\([1-9]{1}[0-9]*\\))?\\.' + escape(name_suffix) + '$'
     result = select_execute('select name from storage where username = %s and path = %s and name REGEXP %s and trash_can = %s', (username, path, name_exp, trash_can))
@@ -496,17 +536,22 @@ def generate_name(username, path, name, trash_can):
     for i in range(len(result)):
         if result[i][0] == name:
             number.append(0)
+            index = get_index(name)
+            if index:
+                number.append(index)
         else:
-            number.append(get_index(result[i][0]))
+            index = get_index(result[i][0])
+            if index:
+                number.append(index)
     for i in range(10000):
         if i not in number:
             if i == 0:
-                add_str = ''
+                af_name = name
             else:
-                add_str = '(' + str(i) + ')'
+                index = len(name_stem)
+                af_name = name1[0:index] + '(' + str(i) + ')' + name1[index:]
             break
-    index = len(name_stem)
-    return name[0:index] + add_str + name[index:]
+    return af_name
 
 def get_mime(path):
     from .mime import MIME

@@ -23,7 +23,8 @@ class UserApi(views.MethodView):
             if request.json.get('enable_cookie') == 'true':
                 cookie_id = set_cookie_id(username)
                 if cookie_id:
-                    return gen_json_res({'login_id': cookie_id, 'max_age': '86400', 'domain': current_app.config['SESSION_COOKIE_DOMAIN'], 'path': current_app.config['SESSION_COOKIE_PATH'], 'secure': current_app.config['SESSION_COOKIE_SECURE'], 'samesite': current_app.config['SESSION_COOKIE_SAMESITE']})
+                    return gen_json_res({'login_id': cookie_id,
+                    'max_age': current_app.config['SESSION_COOKIE_AGE'], 'domain': current_app.config['SESSION_COOKIE_DOMAIN'], 'path': current_app.config['SESSION_COOKIE_PATH'], 'secure': current_app.config['SESSION_COOKIE_SECURE'], 'samesite': current_app.config['SESSION_COOKIE_SAMESITE']})
                 else:
                     return gen_error_res('不能设置COOKIE', 500)
             return ('', 200)

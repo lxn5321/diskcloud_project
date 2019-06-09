@@ -1,35 +1,40 @@
 <div class='menu_title'></div>
 <div class='menu_body'>
 if(mode === 'entry')
-  if(!isFileRow && CURRENTPATH !== 'trash_can')
+  <!-- if(!isFileRow && CURRENTPATH !== 'trash_can') -->
   <div class='menu_entry' id='menu_open'>打开</div> 2
-  if(CURRENTPATH === 'star' || CURRENTPATH === 'share' || currentTarget === 'search')
+  <!-- if(CURRENTPATH === 'star' || CURRENTPATH === 'share' || currentTarget === 'search') -->
   <div class='menu_entry' id='menu_redirect'>显示位置</div> 3
-  if(CURRENTPATH !== 'trash_can')
+  <!-- if(CURRENTPATH !== 'trash_can') -->
   <div class='menu_entry' id='menu_download'>下载</div> 4
-  if(CURRENTPATH === 'share')
-  <div class='menu_entry' id='menu_share'>获取分享链接</div> 5
-  if(CURRENTPATH !== 'share' || CURRENTPATH !== 'trash_can')
+  <!-- if(CURRENTPATH === 'share' and innerText !== '已过期') -->
+  <div class='menu_entry' id='menu_get_share_url'>获取分享链接</div> 5
+  <!-- if(CURRENTPATH !== 'share' and CURRENTPATH !== 'trash_can') -->
   <div class='menu_entry' id='menu_share'>分享</div> 6
-  if(CURRENTPATH === 'share')
-  <div class='menu_entry' id='menu_share'>取消分享</div> 7
-  if(!isStared && CURRENTPATH !== 'trash_can')
-  <div class='menu_entry' id='menu_star'>收藏</div> 8
-  if(isStared && CURRENTPATH !== 'trash_can')
-  <div class='menu_entry' id='menu_unstar'>取消收藏</div> 9
-  if(CURRENTPATH !== 'star' || CURRENTPATH !== 'share' || currentTarget !== 'search' || CURRENTPATH !== 'trash_can')
-  <div class='menu_entry' id='menu_move'>移动到</div> 10
-  if(CURRENTPATH !== 'trash_can')
-  <div class='menu_entry' id='menu_rename'>重命名</div> 11
-  if(CURRENTPATH !== 'trash_can')
-  <div class='menu_entry' id='menu_delete'>删除</div> 12
-  if(CURRENTPATH === 'trash_can')
-  <div class='menu_entry' id='menu_undelete'>还原</div> 13
-  if(CURRENTPATH === 'trash_can')
-  <div class='menu_entry' id='menu_delete'>永久删除</div> 14
-if(mode === 'blank')
-<div class='menu_entry' id='menu_refresh'>刷新</div> 15
-<div class='menu_entry' id='menu_create_file'>新建文件</div> 16
-<div class='menu_entry' id='menu_create_folder'>新建文件夹</div> 17
-<div class='menu_entry' id='menu_upload_file'>上传文件</div> 18
+  <!-- if(CURRENTPATH === 'share' and innerText === '已过期') -->
+  <div class='menu_entry' id='menu_reshare'>再次分享</div>7
+  <!-- if(CURRENTPATH === 'share' and innerText !== '已过期') -->
+  <div class='menu_entry' id='menu_unshare'>取消分享</div> 8
+  <!-- if(CURRENTPATH === 'share' and innerText === '已过期') -->
+  <div class='menu_entry' id='menu_remove_share'>移除记录</div> 9
+  <!-- if(!isStared && CURRENTPATH !== 'trash_can') -->
+  <div class='menu_entry' id='menu_star'>收藏</div> 10
+  <!-- if(isStared && CURRENTPATH !== 'trash_can') -->
+  <div class='menu_entry' id='menu_unstar'>取消收藏</div> 11
+  <!-- if(CURRENTPATH !== 'star' || CURRENTPATH !== 'share' || currentTarget !== 'search' || CURRENTPATH !== 'trash_can') -->
+  <div class='menu_entry' id='menu_move'>移动到</div> 12
+  <!-- if(CURRENTPATH !== 'trash_can') -->
+  <div class='menu_entry' id='menu_rename'>重命名</div> 13
+  <!-- if(CURRENTPATH !== 'trash_can') -->
+  <div class='menu_entry' id='menu_remove'>删除</div> 14
+  <!-- if(CURRENTPATH === 'trash_can') -->
+  <div class='menu_entry' id='menu_restore'>还原</div> 15
+  <!-- if(CURRENTPATH === 'trash_can') -->
+  <div class='menu_entry' id='menu_delete'>彻底删除</div> 16
+<!-- if(mode === 'blank') -->
+<div class='menu_entry' id='menu_refresh'>刷新</div> 17
+<div class='menu_entry' id='menu_create_file'>新建文件</div> 18
+<div class='menu_entry' id='menu_create_folder'>新建文件夹</div> 19
+<div class='menu_entry' id='menu_upload_file'>上传文件</div> 20
+<div class='menu_entry' id='menu_empty'>清空回收站</div> 21
 </div>

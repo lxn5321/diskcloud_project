@@ -30,6 +30,7 @@ function init_all() {
   document.querySelector(".menu").addEventListener("click", menuClickHandler);
   document.querySelector(".menu").addEventListener("contextmenu", mouseMenuRightClickHandler);
   document.querySelector("#search-btn").addEventListener("click", searchBtnClickHandler);
+  document.querySelector(".modal").addEventListener("contextmenu", modalRightClickHandler);
 }
 
 function resize() {
@@ -69,6 +70,8 @@ function get_json(path, exec_func = null) {
     url = PARADICT["file_api_url"] + PARADICT["username"] + pathParseUrl() + "?share_info=1";
   } else if (path === 'trash_can') {
     url = PARADICT["file_api_url"] + PARADICT["username"] + pathParseUrl() + "?trash_can_info=1";
+  } else if (path === 'search'){
+    url = PARADICT["file_api_url"] + PARADICT["username"] + pathParseUrl() + "?search_info=1&search_text=" + document.querySelector('#search-input').value;
   } else {
     url = PARADICT["file_api_url"] + PARADICT["username"] + pathParseUrl() + "?info=1";
   }
@@ -564,36 +567,41 @@ function showMenu(ev, mode) {
       if(CURRENTPATH === 'share'){
         htmlArray[3] = "<div class='menu_entry' id='menu_redirect'>显示位置</div>"
         if(selectedElem.querySelector('.expire_time-col').innerText === '已过期'){
-          htmlArray[6] = "<div class='menu_entry' id='menu_share'>分享</div>";
+          htmlArray[7] = "<div class='menu_entry' id='menu_reshare'>再次分享</div>";
+          htmlArray[9] = "<div class='menu_entry' id='menu_remove_share'>移除记录</div>"
         }else{
           htmlArray[5] = "<div class='menu_entry' id='menu_get_share_url'>获取分享链接</div>";
-          htmlArray[7] = "<div class='menu_entry' id='menu_unshare'>取消分享</div>";
+          htmlArray[8] = "<div class='menu_entry' id='menu_unshare'>取消分享</div>";
         }
       }else{
         if(CURRENTPATH !== 'star' && CURRENTPATH !== 'search'){
-          htmlArray[10] = "<div class='menu_entry' id='menu_move'>移动到</div>";
+          htmlArray[12] = "<div class='menu_entry' id='menu_move'>移动到</div>";
         }
         htmlArray[6] = "<div class='menu_entry' id='menu_share'>分享</div>";
       }
       if(!isStared){
-        htmlArray[8] = "<div class='menu_entry' id='menu_star'>收藏</div>";
+        htmlArray[10] = "<div class='menu_entry' id='menu_star'>收藏</div>";
       }else{
-        htmlArray[9] = "<div class='menu_entry' id='menu_unstar'>取消收藏</div>";
+        htmlArray[11] = "<div class='menu_entry' id='menu_unstar'>取消收藏</div>";
       }
       if(CURRENTPATH === 'star' || CURRENTPATH === 'search'){
         htmlArray[3] = "<div class='menu_entry' id='menu_redirect'>显示位置</div>";
       }
-      htmlArray[11] = "<div class='menu_entry' id='menu_rename'>重命名</div>";
-      htmlArray[12] = "<div class='menu_entry' id='menu_remove'>删除</div>";
+      htmlArray[13] = "<div class='menu_entry' id='menu_rename'>重命名</div>";
+      htmlArray[14] = "<div class='menu_entry' id='menu_remove'>删除</div>";
     }else{
-      htmlArray[13] = "<div class='menu_entry' id='menu_restore'>还原</div>";
-      htmlArray[14] = "<div class='menu_entry' id='menu_delete'>彻底删除</div>";
+      htmlArray[15] = "<div class='menu_entry' id='menu_restore'>还原</div>";
+      htmlArray[16] = "<div class='menu_entry' id='menu_delete'>彻底删除</div>";
     }
   }else if(mode === 'blank'){
-    htmlArray[15] = "<div class='menu_entry' id='menu_refresh'>刷新</div>";
-    htmlArray[16] = "<div class='menu_entry' id='menu_create_file'>新建文件</div>";
-    htmlArray[17] = "<div class='menu_entry' id='menu_create_folder'>新建文件夹</div>";
-    htmlArray[18] ="<div class='menu_entry' id='menu_upload_file'>上传文件</div>";
+    htmlArray[17] = "<div class='menu_entry' id='menu_refresh'>刷新</div>";
+    if(CURRENTPATH === 'trash_can'){
+      htmlArray[21] = "<div class='menu_entry' id='menu_empty'>清空回收站</div>";
+    }else{
+      htmlArray[18] = "<div class='menu_entry' id='menu_create_file'>新建文件</div>";
+      htmlArray[19] = "<div class='menu_entry' id='menu_create_folder'>新建文件夹</div>";
+      htmlArray[20] ="<div class='menu_entry' id='menu_upload_file'>上传文件</div>";
+    }
   }
   htmlArray.push("</div>");
   height = (htmlArray.filter(n => n).length - 3) * 30 + 15;
@@ -683,7 +691,7 @@ function rightContainerRightClickHandler(ev) {
     select(result, '.right-container');
     showMenu(ev, 'entry');
   } else {
-    if (CURRENTPATH !== 'share' && CURRENTPATH !== 'star' && CURRENTPATH !== 'trash_can' && CURRENTPATH !== 'search') {
+    if (CURRENTPATH !== 'share' && CURRENTPATH !== 'star' && CURRENTPATH !== 'search') {
       unselect('.right-container');
       showMenu(ev, 'blank');
     }else{
@@ -709,13 +717,15 @@ function menuClickHandler(ev) {
     createFolder()
   } else if (ev.target.id === 'menu_upload_file') {
     $("#fileElem").click();
+  } else if(ev.target.id === 'menu_empty'){
+    emptyTrashCan();
   } else if (ev.target.id === 'menu_open') {
     openEntry();
   } else if (ev.target.id === 'menu_download') {
     downloadEntry();
-  } else if (ev.target.id === 'menu_share') {
+  } else if (ev.target.id === 'menu_share' || ev.target.id === 'menu_res') {
     shareEntry();
-  } else if (ev.target.id === 'menu_unshare'){
+  } else if (ev.target.id === 'menu_unshare' || ev.target.id === 'menu_remove_share'){
     unshareEntry();
   } else if (ev.target.id === 'menu_move') {
     moveEntry();
@@ -771,17 +781,22 @@ function searchBtnClickHandler(ev){
         createBreadCrumb();
       })
     }else{
-      alert('获取数据失败')
+      alert('获取数据失败');
     }
   })
 }
 
+function modalRightClickHandler(ev){
+  ev.preventDefault();
+}
+// operate function
 function openEntry(){
   let path;
   let name = document.querySelector('.right-container .selected .content').innerText;
   if(CURRENTPATH === 'star' || CURRENTPATH === 'share' || CURRENTPATH === 'search'){
     path = get_path_from_json();
     path = path + '/' + name;
+    select(document.querySelector('.sidebar #sidebar-my_file'), '.sidebar');
     draw_all(path);
   }else if(CURRENTPATH !== 'trash_can'){
     path = CURRENTPATH + "/" + name;
@@ -846,6 +861,9 @@ function shareEntry() {
               life = "永久";
             } else {
               life += "小时";
+            }
+            if(CURRENTPATH === 'share'){
+              draw_all()
             }
             modalTitle.text("分享成功");
             modalPrompt.text("");
@@ -1307,7 +1325,7 @@ function restoreEntry() {
         } else {
           response.json().then(function(data) {
             modalTitle.text("发生了一个错误");
-            modalBody.html(error_message("还原失败", false, data))
+            modalBody.html(error_message("还原失败。", false, data))
           })
         }
       })
@@ -1372,6 +1390,7 @@ function getShareUrl(){
   let modalBody = modal.find(".modal-body");
   let modalFooter = modal.find(".modal-footer");
   let confirmButton = modalFooter.find('.btn-primary');
+  confirmButton.css("display", "none");
   fetch(url, {
     credentials: "same-origin",
     method: "GET"
@@ -1417,13 +1436,17 @@ function uploadFiles(files) {
       same = true;
       modalTitle.text("上传失败");
       modalBody.html(error_message("当前目录内有与上传文件相同名称的文件或者文件夹.", false));
-      break;
+      document.querySelector('#fileElem').value = '';
+      modal.modal('show');
+      return
     }
     if (!re.test(files[i].name) || files[i].name.length > 255) {
       valid = false;
       modalTitle.text("上传失败");
       modalBody.html(error_message("上传文件名称不合法.", false));
-      break;
+      document.querySelector('#fileElem').value = '';
+      modal.modal('show');
+      return
     }
     formData.append('file' + i, files[i]);
   }
@@ -1438,17 +1461,18 @@ function uploadFiles(files) {
           modalTitle.text("上传成功");
           modalBody.html(success_message("已成功上传文件"));
           draw_all(CURRENTPATH);
+          document.querySelector('#fileElem').value = '';
+          modal.modal('show');
         } else {
           response.json().then(function(data) {
             modalTitle.text("上传失败");
             modalBody.html(error_message("上传失败.", false, data));
+            document.querySelector('#fileElem').value = '';
+            modal.modal('show');
           })
         }
       })
   }
-
-  document.querySelector('#fileElem').value = '';
-  modal.modal('show');
 }
 
 function createFile() {
@@ -1543,5 +1567,42 @@ function createFolder() {
   modal.modal('show');
 }
 
+function emptyTrashCan(){
+  let url = PARADICT["file_api_url"] + PARADICT["username"] + pathParseUrl() + "?empty_trash_can=1";
+  let modal = $(".confirm_modal");
+  let modalTitle = modal.find(".modal-title");
+  let modalPrompt = modal.find(".modal-prompt");
+  let modalBody = modal.find(".modal-body");
+  let modalFooter = modal.find(".modal-footer");
+  // add content
+  modalTitle.text("确认清空回收站");
+  modalPrompt.text("");
+  modalBody.text("确认将回收站彻底清空？\n该操作无法撤销！");
+  modalFooter.html('<button type="button" class="btn btn-primary">确认</button><button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>');
+
+  let confirmButton = modalFooter.find('.btn-primary');
+  confirmButton.off().one("click", function() {
+    fetch(url, {
+        credentials: "same-origin",
+        method: "DELETE"
+      })
+      .then(function(response) {
+        confirmButton.css("display", "none");
+        if (response.ok) {
+          draw_all()
+          modalPrompt.text("");
+          modalTitle.text("清空回收站成功");
+          modalBody.html(success_message("已成功清空回收站"));
+        } else {
+          response.json().then(function(data) {
+            modalTitle.text("发生了一个错误");
+            modalBody.html(error_message("清空回收站失败", false, data))
+          })
+        }
+      })
+  });
+  modal.modal('show');
+}
 // init all
+
 window.onload = init_all();

@@ -48,6 +48,8 @@ class FileApi(views.MethodView):
             if request.json.get("af_path", None):
                 return self.Move(path)
     def delete(self,path):
+        if request.args.get('empty_trash_can') == '1':
+            return self.EmptyTrashcan(path)
         return self.Delete(path)
     # Main Processer
     # path = username/path
@@ -74,7 +76,7 @@ class FileApi(views.MethodView):
                 json_obj = get_whole_folder_info(result['username'])
                 return gen_json_res(json_obj)
             else:
-                return gen_error_res('invalid url', 400)
+                return gen_error_res('无效的URL', 400)
         return result
 
     def StarInfo(self, path):
@@ -87,7 +89,7 @@ class FileApi(views.MethodView):
                 json_obj = get_star_info(result['username'])
                 return gen_json_res(json_obj)
             else:
-                return gen_error_res('invalid url', 400)
+                return gen_error_res('无效的URL', 400)
         return result
 
     def ShareInfo(self, path):
@@ -100,7 +102,7 @@ class FileApi(views.MethodView):
                 json_obj = get_share_info(result['username'])
                 return gen_json_res(json_obj)
             else:
-                return gen_error_res('invalid url', 400)
+                return gen_error_res('无效的URL', 400)
         return result
 
     def TrashCanInfo(self, path):
@@ -113,7 +115,7 @@ class FileApi(views.MethodView):
                 json_obj = get_trash_can_info(result['username'])
                 return gen_json_res(json_obj)
             else:
-                return gen_error_res('invalid url', 400)
+                return gen_error_res('无效的URL', 400)
         return result
 
     def SearchInfo(self, path):
@@ -122,14 +124,14 @@ class FileApi(views.MethodView):
 
         search_text = request.args.get('search_text', None)
         if search_text is None:
-            return gen_error_res("invalid request args",400)
+            return gen_error_res("无效的请求参数",400)
         result = valid_url_path(path, True)
         if isinstance(result, dict):
             if result['path'] == '.' and result['name'] == '.':
                 json_obj = get_search_info(result['username'], search_text)
                 return gen_json_res(json_obj)
             else:
-                return gen_error_res('invalid url', 400)
+                return gen_error_res('无效的URL', 400)
         return result
 
     def ShareId(self, path):
@@ -154,21 +156,13 @@ class FileApi(views.MethodView):
         bf_result = valid_url_path(path)
         if isinstance(bf_result,dict):
             af_path = request.json.get("af_path")
-            af_result = valid_url_path(af_path,root_ok=True)
+            af_result = valid_url_path(af_path, True)
             if isinstance(af_result,dict):
                 if af_result['is_file'] is False:
                     return moveto(bf_result['username'], bf_result['path'], bf_result['name'], af_result['path'], af_result['name'], bf_result['is_file'])
-                return gen_error_res("af_path must be a dir",400)
+                return gen_error_res("目标路径必须是文件夹",400)
             return af_result
         return bf_result
-
-    def Delete(self,path):
-        from diskcloud.libs.file import delete
-
-        result = valid_url_path(path)
-        if isinstance(result,dict):
-            return delete(result['username'], result['path'], result['name'], result['is_file'])
-        return result
 
     def CreateFile(self,path):
         from diskcloud.libs.file import create_file
@@ -176,14 +170,14 @@ class FileApi(views.MethodView):
 
         name = request.args.get('name', None)
         if name is None:
-            return gen_error_res("invalid request args",400)
+            return gen_error_res("无效的请求参数",400)
         result = valid_url_path(path, True)
         if isinstance(result,dict):
             if result['is_file'] is False:
                 if valid_file_name(name):
                     return create_file(result['username'], result['path'], result['name'], name)
-                return gen_error_res("invalid file name",400)
-            return gen_error_res("path must be a dir",400)
+                return gen_error_res("无效的文件名称",400)
+            return gen_error_res("路径必须是文件夹",400)
         return result
 
     def CreateFolder(self,path):
@@ -192,14 +186,14 @@ class FileApi(views.MethodView):
 
         name = request.args.get('name', None)
         if name is None:
-            return gen_error_res("invalid request args",400)
+            return gen_error_res("无效的请求参数",400)
         result = valid_url_path(path, True)
         if isinstance(result,dict):
             if result['is_file'] is False:
                 if valid_dir_name(name):
                     return create_folder(result['username'], result['path'], result['name'], name)
-                return gen_error_res("invalid folder name",400)
-            return gen_error_res("path must be a dir",400)
+                return gen_error_res("无效的文件夹名称",400)
+            return gen_error_res("路径必须是文件夹",400)
         return result
 
     def UploadFiles(self,path):
@@ -211,16 +205,16 @@ class FileApi(views.MethodView):
             if result['is_file'] is False:
                 files = request.files
                 if len(files) == 0:
-                    return gen_error_res("no selected file")
+                    return gen_error_res("没有选中的文件")
                 for i in files:
                     if valid_file_name(files[i].filename):
                         save_result = save_file(result['username'], result['path'],  result['name'], files[i])
                         if save_result is not True:
                             return save_result
                     else:
-                        return gen_error_res('invalid file name', 400)
+                        return gen_error_res('无效的文件名称', 400)
                 return ('', 200)
-            return gen_error_res("path must be a dir",400)
+            return gen_error_res("路径必须是文件夹",400)
         return result
 
     def Rename(self,path):
@@ -233,10 +227,10 @@ class FileApi(views.MethodView):
             af_name = request.json.get('af_name')
             if result['is_file']:
                 if not valid_file_name(af_name):
-                    return gen_error_res('invalid file name', 400)
+                    return gen_error_res('无效的文件名称', 400)
             else:
                 if not valid_dir_name(af_name):
-                    return gen_error_res('invalid dir name', 400)
+                    return gen_error_res('无效的文件夹名称', 400)
             return rename(result['username'], result['path'], result['name'], af_name, result['is_file'])
         return result
 
@@ -249,13 +243,13 @@ class FileApi(views.MethodView):
             # check id_life
             id_life = request.args.get('life')
             if id_life is None:
-                return gen_error_res('invalid life parameter',400)
+                return gen_error_res('无效的时间参数',400)
             try:
                 id_life = int(id_life)
             except ValueError:
-                return gen_error_res('invalid life parameter',400)
+                return gen_error_res('无效的时间参数',400)
             if not 0 <= id_life <= 24:
-                return gen_error_res('invalid life parameter',400)
+                return gen_error_res('无效的时间参数',400)
             # generate share id
             result = generate_id(result['username'], result['path'], result['name'], id_life)
             if result['succeed']:
@@ -298,7 +292,26 @@ class FileApi(views.MethodView):
     def Untrashcan(self, path):
         from diskcloud.libs.file import untrash_can
 
-        result = valid_url_path(path)
+        result = valid_url_path(path, False, True)
         if isinstance(result,dict):
             return untrash_can(result['username'], result['path'],  result['name'], result['is_file'])
+        return result
+
+    def Delete(self,path):
+        from diskcloud.libs.file import delete
+
+        result = valid_url_path(path, False, True)
+        if isinstance(result,dict):
+            return delete(result['username'], result['path'], result['name'], result['is_file'])
+        return result
+
+    def EmptyTrashcan(self, path):
+        from diskcloud.libs.file import empty_trash_can
+
+        result = valid_url_path(path, True)
+        if isinstance(result, dict):
+            if result['path'] == '.' and result['name'] == '.':
+                return empty_trash_can(result['username'])
+            else:
+                return gen_error_res('无效的URL', 400)
         return result
