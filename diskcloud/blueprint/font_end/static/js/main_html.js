@@ -1574,33 +1574,40 @@ function emptyTrashCan(){
   let modalPrompt = modal.find(".modal-prompt");
   let modalBody = modal.find(".modal-body");
   let modalFooter = modal.find(".modal-footer");
-  // add content
-  modalTitle.text("确认清空回收站");
-  modalPrompt.text("");
-  modalBody.text("确认将回收站彻底清空？\n该操作无法撤销！");
-  modalFooter.html('<button type="button" class="btn btn-primary">确认</button><button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>');
+  if(document.querySelector('.entry-row') === null){
+    modalTitle.text("回收站已空");
+    modalPrompt.text("");
+    modalBody.text("回收站目前已空，无需清空");
+    modalFooter.html('<button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>');
+  }else {
+    modalTitle.text("确认清空回收站");
+    modalPrompt.text("");
+    modalBody.text("确认将回收站彻底清空？\n该操作无法撤销！");
+    modalFooter.html('<button type="button" class="btn btn-primary">确认</button><button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>');
 
-  let confirmButton = modalFooter.find('.btn-primary');
-  confirmButton.off().one("click", function() {
-    fetch(url, {
-        credentials: "same-origin",
-        method: "DELETE"
-      })
-      .then(function(response) {
-        confirmButton.css("display", "none");
-        if (response.ok) {
-          draw_all()
-          modalPrompt.text("");
-          modalTitle.text("清空回收站成功");
-          modalBody.html(success_message("已成功清空回收站"));
-        } else {
-          response.json().then(function(data) {
-            modalTitle.text("发生了一个错误");
-            modalBody.html(error_message("清空回收站失败", false, data))
-          })
-        }
-      })
-  });
+    let confirmButton = modalFooter.find('.btn-primary');
+    confirmButton.off().one("click", function() {
+      fetch(url, {
+          credentials: "same-origin",
+          method: "DELETE"
+        })
+        .then(function(response) {
+          confirmButton.css("display", "none");
+          if (response.ok) {
+            draw_all()
+            modalPrompt.text("");
+            modalTitle.text("清空回收站成功");
+            modalBody.html(success_message("已成功清空回收站"));
+          } else {
+            response.json().then(function(data) {
+              modalTitle.text("发生了一个错误");
+              modalBody.html(error_message("清空回收站失败", false, data))
+            })
+          }
+        })
+    });
+  }
+  
   modal.modal('show');
 }
 // init all
