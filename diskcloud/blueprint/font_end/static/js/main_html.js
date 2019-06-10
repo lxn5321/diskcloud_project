@@ -6,10 +6,6 @@ let CURRENTPATH = null;
 let JSONDATA = null;
 let W, H;
 
-window.onresize = function(ev) {
-  resize();
-}
-
 function init_all() {
   draw_all('.');
   resize();
@@ -31,6 +27,10 @@ function init_all() {
   document.querySelector(".menu").addEventListener("contextmenu", mouseMenuRightClickHandler);
   document.querySelector("#search-btn").addEventListener("click", searchBtnClickHandler);
   document.querySelector(".modal").addEventListener("contextmenu", modalRightClickHandler);
+
+  window.onresize = function(ev) {
+    resize();
+  }
 }
 
 function resize() {
