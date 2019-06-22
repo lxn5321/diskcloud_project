@@ -6,12 +6,10 @@ def now_time(offset = 8):
 def strftime(time):
     return time.strftime("%y%m%d%H%M%S")
 
-def strptime(str):
-    from datetime import datetime
-    from pytz import timezone
+def strptime(str, offset = 8):
+    from datetime import datetime, timezone, timedelta
 
-    tz = timezone('Asia/Shanghai')
-    time = tz.localize(datetime.strptime(str, "%y%m%d%H%M%S"))
+    time = datetime.strptime(str, "%y%m%d%H%M%S").replace(tzinfo = timezone(timedelta(hours = offset)))
 
     return time
 
