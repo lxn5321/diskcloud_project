@@ -1,0 +1,10 @@
+instance.py
+/venv/
+**/__pycache__/
+/files/**
+/diskcloud/config/**
+/tests/sql_con.py
+/diskcloud/views/**
+!/diskcloud/config/*_example.py
+!/diskcloud/views
+!/files
