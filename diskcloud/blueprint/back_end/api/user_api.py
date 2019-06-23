@@ -1,4 +1,4 @@
-from flask import request,views,current_app
+from flask import request,views,current_app,make_response
 from diskcloud.libs.response import gen_error_res
 
 class UserApi(views.MethodView):
@@ -23,8 +23,10 @@ class UserApi(views.MethodView):
             if request.json.get('enable_cookie') == 'true':
                 cookie_id = set_cookie_id(username)
                 if cookie_id:
-                    return gen_json_res({'login_id': cookie_id,
-                    'max_age': current_app.config['SESSION_COOKIE_AGE'], 'domain': current_app.config['SESSION_COOKIE_DOMAIN'], 'path': current_app.config['SESSION_COOKIE_PATH'], 'secure': current_app.config['SESSION_COOKIE_SECURE'], 'samesite': current_app.config['SESSION_COOKIE_SAMESITE']})
+                    response = make_response('')
+                    response.status_code = 200
+                    response.set_cookie('login_id',value=cookie_id,max_age=current_app.config['COOKIE_LIFETIME'],path=current_app.config['SESSION_COOKIE_PATH'],domain=current_app.config['SESSION_COOKIE_DOMAIN'],secure=current_app.config['SESSION_COOKIE_SECURE'],samesite=current_app.config['SESSION_COOKIE_SAMESITE'],httponly=current_app.config['SESSION_COOKIE_HTTPONLY'])
+                    return response
                 else:
                     return gen_error_res('不能设置COOKIE', 500)
             return ('', 200)

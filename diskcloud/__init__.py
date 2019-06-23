@@ -9,9 +9,9 @@ def create_app(debug=False):
 
     #import config from file
     if debug is True:
-        app.config.from_pyfile('config/debug_config.py',silent=True)
+        app.config.from_pyfile('config/debug_config.py')
     else:
-        app.config.from_pyfile('config/config.py',silent=True)
+        app.config.from_pyfile('config/production_config.py')
 
     # add blueprint
     from .blueprint.font_end.bp import font_end

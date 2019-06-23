@@ -81,15 +81,6 @@ function loginClickHanlder(ev){
     })
     .then(response => {
       if (response.ok){
-        if(checkbox_value === 'true'){
-          response.json().then(data => {
-            let secure_str = '';
-            if(data.secure === 'True'){
-              secure_str = 'secure';
-            }
-            document.cookie = 'login_id=' + data.login_id + ';max-age=' + data.max_age + ';domian=' + data.domain + ';path=' + data.path + ';SameSite=' + data.samesite + ';' + secure_str;
-          });
-        }
         window.location.replace(PARADICT["main_html_url"] + username_input.val() + '/');
       }else{
         response.json().then(data => {

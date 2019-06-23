@@ -7,6 +7,7 @@ from diskcloud.libs.cookie import get_username_cookie,set_cookie_id
 def Login():
     if request.args.get('logout'):
         response = make_response(render_template('login.html'))
+        response.set_cookie('login_id',max_age=0,path=current_app.config['SESSION_COOKIE_PATH'],domain=current_app.config['SESSION_COOKIE_DOMAIN'],secure=current_app.config['SESSION_COOKIE_SECURE'],samesite=current_app.config['SESSION_COOKIE_SAMESITE'],httponly=current_app.config['SESSION_COOKIE_HTTPONLY'])
         delete_session('username')
         return response
 
@@ -21,7 +22,8 @@ def Login():
             create_session('username',username)
             return redirect(url_for('FontEnd.Main',username = username))
         else:
-            response = make(render_template('login.html'))
-            response.set_cookie('login_id',path=current_app.config['SESSION_COOKIE_PATH'],domain=current_app.config['SESSION_COOKIE_DOMAIN'],secure=current_app.config['SESSION_COOKIE_SECURE'],samesite=current_app.coconfig['SESSION_COOKIE_SAMESITE'])
+            response = make_response(render_template('login.html'))
+            response.set_cookie('login_id',max_age=0,path=current_app.config['SESSION_COOKIE_PATH'],domain=current_app.config['SESSION_COOKIE_DOMAIN'],secure=current_app.config['SESSION_COOKIE_SECURE'],samesite=current_app.config['SESSION_COOKIE_SAMESITE'],httponly=current_app.config['SESSION_COOKIE_HTTPONLY'])
+            return response
 
     return render_template('login.html')

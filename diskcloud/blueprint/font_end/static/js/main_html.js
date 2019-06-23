@@ -14,7 +14,6 @@ function init_all() {
     $('#name_input').focus();
   });
   document.querySelector("#logout_btn").addEventListener("click", () => {
-    document.cookie = 'login_id=;max-age=0;domian=diskcloud.ga;path=/diskcloud/;SameSite=Lax;'
     window.location.replace(PARADICT["logout_url"]);
   });
   document.querySelector(".whole-container").addEventListener("click", wholeContainerClickHandler);
@@ -1607,7 +1606,7 @@ function emptyTrashCan(){
         })
     });
   }
-  
+
   modal.modal('show');
 }
 // init all
