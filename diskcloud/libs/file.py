@@ -41,7 +41,7 @@ def download(path):
 
         response = make_response('')
         filename_escape = quote(filename)
-        response.headers['X-Accel-Redirect'] = current_app.config['NGINX_X_ACCEL_REDIRECT'] + complete_path.relative_to(current_app.config['FILES_FOLDER']).as_posix()
+        response.headers['X-Accel-Redirect'] = current_app.config['NGINX_X_ACCEL_REDIRECT'] + '/' +complete_path.relative_to(current_app.config['FILES_FOLDER']).as_posix()
         response.headers['Content-Disposition'] = "attachment;filename=" + filename_escape + ";filename*=UTF-8''" + filename_escape
         response.headers['Content-Length'] = content_length
         response.headers['Content-Type'] = content_mime
@@ -552,6 +552,11 @@ def generate_name(username, path, name, trash_can):
                 af_name = name1[0:index] + '(' + str(i) + ')' + name1[index:]
             break
     return af_name
+
+def get_size(path):
+    import os
+
+    return os.path.getsize(path)
 
 def get_mime(path):
     from .mime import MIME

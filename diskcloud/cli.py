@@ -3,7 +3,7 @@ from flask.cli import with_appcontext
 
 def init_app(app):
     app.cli.add_command(init_db)
-    # app.cli.add_command(add_user)
+    app.cli.add_command(add_user)
     app.cli.add_command(remove_user)
 
 @click.command()
@@ -97,65 +97,65 @@ def init_db(force):
     click.echo("init db success!")
     return True
 
-# @click.command()
-# @with_appcontext
-# @click.option('--username', required=True, prompt='username', help='username')
-# @click.option('--password', required=True, prompt='password', hide_input=True, confirmation_prompt=True, help='password')
-# @click.option('--email', required=True, prompt='password', hide_input=True, confirmation_prompt=True, help='password')
-# @click.option('--force', is_flag=True, default=False, help='if user already exists,delete it.')
-# def add_user(username, password, force):
-#     from diskcloud.libs.mysql import select_execute, update_execute, insert_execute, delete_execute, db_commit, db_rollback
-#     from diskcloud.libs.string import hash_sha3
-#     from diskcloud.libs.valid import valid_username, valid_password
-#     from shutil import rmtree
-#     from os import mkdir
-#     from pathlib import Path
-#     from flask import current_app
-#     from time import sleep
-#
-#     if not valid_username(username):
-#         click.echo("invalid username!")
-#         return False
-#     elif not valid_password(password):
-#         click.echo("invalid password!")
-#         return False
-#     password = hash_sha3(password)
-#     user_path = Path(current_app.config['FILES_FOLDER'], 'user', username).as_posix()
-#     trash_can_path = Path(current_app.config['FILES_FOLDER'], 'trash_can', username).as_posix()
-#     tar_path = Path(current_app.config['FILES_FOLDER'], 'tar', username).as_posix()
-#     result = select_execute('select password from user where username = %s', (username,))
-#     if len(result) != 0:
-#         if not force:
-#             click.echo("the username already exist,if you want to delete it,please add '--force' to enforce.")
-#             return False
-#         else:
-#             try:
-#                 rmtree(user_path)
-#                 rmtree(trash_can_path)
-#                 rmtree(tar_path)
-#                 sleep(0.5)
-#                 mkdir(user_path)
-#                 mkdir(trash_can_path)
-#                 mkdir(tar_path)
-#             except:
-#                 raise
-#             delete_execute('delete from storage where username = %s', (username,))
-#             result = update_execute('update user set password = %s where username = %s', (password, username))
-#     else:
-#         try:
-#             mkdir(user_path)
-#             mkdir(trash_can_path)
-#             mkdir(tar_path)
-#         except:
-#             raise;
-#         result = insert_execute('insert into user(username, password) values(%s, %s)', (username, password))
-#     if result:
-#         db_commit()
-#         click.echo("create user success!");
-#         return True
-#     db_rollback()
-#     click.echo("create user fail!")
-#     return False
+@click.command()
+@with_appcontext
+@click.option('--username', required=True, prompt='username', help='username')
+@click.option('--password', required=True, prompt='password', hide_input=True, confirmation_prompt=True, help='password')
+@click.option('--email', required=True, prompt='email', help='email')
+@click.option('--force', is_flag=True, default=False, help='if user already exists,delete it.')
+def add_user(username, password, email, force):
+    from diskcloud.libs.mysql import select_execute, update_execute, insert_execute, delete_execute, db_commit, db_rollback
+    from diskcloud.libs.string import hash_sha3
+    from diskcloud.libs.valid import valid_username, valid_password
+    from shutil import rmtree
+    from os import makedirs
+    from pathlib import Path
+    from flask import current_app
+    from time import sleep
+
+    if not valid_username(username):
+        click.echo("invalid username!")
+        return False
+    elif not valid_password(password):
+        click.echo("invalid password!")
+        return False
+    password = hash_sha3(password)
+    user_path = Path(current_app.config['FILES_FOLDER'], 'user', username).as_posix()
+    trash_can_path = Path(current_app.config['FILES_FOLDER'], 'trash_can', username).as_posix()
+    tar_path = Path(current_app.config['FILES_FOLDER'], 'tar', username).as_posix()
+    result = select_execute('select password from user where username = %s', (username,))
+    if len(result) != 0:
+        if not force:
+            click.echo("the username already exist,if you want to delete it,please add '--force' to enforce.")
+            return False
+        else:
+            try:
+                rmtree(user_path)
+                rmtree(trash_can_path)
+                rmtree(tar_path)
+                sleep(2)
+                makedirs(user_path)
+                makedirs(trash_can_path)
+                makedirs(tar_path)
+            except:
+                raise
+            delete_execute('delete from storage where username = %s', (username,))
+            result = update_execute('update user set password = %s where username = %s', (password, username))
+    else:
+        try:
+            makedirs(user_path)
+            makedirs(trash_can_path)
+            makedirs(tar_path)
+        except:
+            raise
+        result = insert_execute('insert into user(username, password, email) values(%s, %s, %s)', (username, password, email))
+    if result:
+        db_commit()
+        click.echo("create user success!")
+        return True
+    db_rollback()
+    click.echo("create user fail!")
+    return False
 
 @click.command()
 @with_appcontext

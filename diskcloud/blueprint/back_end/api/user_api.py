@@ -25,7 +25,7 @@ class UserApi(views.MethodView):
                 if cookie_id:
                     response = make_response('')
                     response.status_code = 200
-                    response.set_cookie('login_id',value=cookie_id,max_age=current_app.config['COOKIE_LIFETIME'],path=current_app.config['SESSION_COOKIE_PATH'],domain=current_app.config['SESSION_COOKIE_DOMAIN'],secure=current_app.config['SESSION_COOKIE_SECURE'],samesite=current_app.config['SESSION_COOKIE_SAMESITE'],httponly=current_app.config['SESSION_COOKIE_HTTPONLY'])
+                    response.set_cookie('login_id',value=cookie_id,max_age=current_app.config['COOKIE_LIFETIME'],path=current_app.config['SESSION_COOKIE_PATH'],domain=current_app.config['SESSION_COOKIE_DOMAIN'],secure=current_app.config['SESSION_COOKIE_SECURE'],httponly=current_app.config['SESSION_COOKIE_HTTPONLY'])
                     return response
                 else:
                     return gen_error_res('不能设置COOKIE', 500)
